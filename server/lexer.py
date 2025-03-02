@@ -7,9 +7,8 @@ TOKEN_PATTERNS = [
     ('LOGIC_SECTION', r'(\.LOGIC)\b'),
     ('STATE_NAME', r'\b\w+\]'), 
     ('MEMORY_TYPE', r'\b(STACK)\b'),
-    ('COMMAND', r'\b(SCAN\b(LEFT|RIGHT)?|PRINT|WRITE|READ)\b'),
-    ('DIRECTION', r'\b(LEFT|RIGHT)\b'),
-    ('TRANSITION', r'\([\w#]+,[\w#]+\)'),
+    ('COMMAND', r'\b(SCAN\s*(LEFT|RIGHT)?|PRINT|WRITE|READ)\b'),
+    ('TRANSITION', r'\([\w#]+,\s*[\w#]+\)'),
     ('ARG', r'\([#\w]+\)'),
     ('MEMORY_NAME', r'[#\w]+'),
     ('DELIMITER', r'[,]'), 
@@ -35,17 +34,7 @@ def tokenize_line(line):
         if not matched:
             raise SyntaxError(f"Unexpected token: {line}")
         
+    print(tokens)
     return tokens
 
 
-sample = """.DATA
-STACK S1
-
-.LOGIC
-A] WRITE    (S1)    (#,B)
-B] SCAN    (0,C),  (1,D)
-C] WRITE    (S1)    (#,B)
-D] READ     (S1)    (#,E)
-E] SCAN     (1,D),  (#,F)
-F] READ     (S1)    (#,accept)
-"""

@@ -54,6 +54,13 @@ class Machine:
 
     def scan_left(self, arg, transitions):
         self.tape_head -= 1
+        if self.input is not None:
+            current_symbol = self.input[self.tape_head]
+            next_state = transitions.get(current_symbol, None)
+            
+            if next_state == None:
+                raise Exception('AAAAAAAA')
+            return next_state
 
     def write(self, arg, transitions):
         memory_type = self.memory[arg]['type']
