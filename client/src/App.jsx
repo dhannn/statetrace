@@ -4,6 +4,7 @@ import InputPanel from './components/InputPanel';
 import useWebSocket from "react-use-websocket";
 import StateDiagram from './components/StateDiagram';
 import StandardInput from './components/StandardInput';
+import MemoryPanel from './components/MemoryPanel';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
   const [ inputString, setInputString ] = useState('');
   const [ tapeHead, setTapeHead ] = useState(0);
   const [ currentState, setCurrentState ] = useState();
+  const [ memoryObjects, setMemoryObjects ] = useState([]);
   const [ isInitialized, setIsInitialized ] = useState(false);
 
   useEffect(() => {
@@ -29,13 +31,15 @@ function App() {
           setTapeHead(0);
           setCurrentState(data['current-state']);
           setIsInitialized(true);
+          setMemoryObjects(data['memory'])
           break;
-        
+          
         case 'run':
           setTapeHead(data['input-head']);
           setCurrentState(data['current-state']);
+          setMemoryObjects(data['memory'])
           break;
-          
+
         default:
           break;
       }
@@ -70,10 +74,8 @@ function App() {
           <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
           <StateDiagram states={states} transitions={transitions} currentState={currentState}/>
         </div>
-        <div className='memory-panel'>
-          <h2>Memory</h2>
-          <p>Test</p>
-        </div>
+
+        <MemoryPanel memory={memoryObjects}/>
       </>
       }
     </>

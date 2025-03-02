@@ -33,15 +33,19 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     
     states = []
     for state in stateSet:
-        states.append({
+        s = {
             'id': state
-        })
+        }
 
-    pprint(stateSet)
-    pprint(transitions)
+        if ss := machine.states.get(state, None):
+            s['command'] = ss['command']
+        
+        states.append(s)
+
+    memory_objects = [ {'id': name, 'type': machine.memory[name]['type']} for name in machine.memory ]
 
     x = json.dumps({
-        'memory': machine.memory,
+        'memory': memory_objects,
         'states': states,
         'transitions': transitions,
         'current-state': machine.state,
@@ -54,12 +58,18 @@ async def load(websocket: WebSocket, input_string, machine_definition):
 
 async def run(websocket: WebSocket, machine: Machine):
     while machine.state != 'accept' and machine.state != 'reject':
-        await asyncio.sleep(0.75)
+        await asyncio.sleep(1)
         machine.next()
+        memory_objects = [ {
+            'id': name, 
+            'type': machine.memory[name]['type'], 
+            'content': machine.memory[name]['content'] 
+        } for name in machine.memory ]
         x = json.dumps({
             'state': machine.state,
             'input-head': machine.tape_head,
             'current-state': machine.state,
+            'memory': memory_objects,
             'type': 'run'
         })
         await websocket.send_text(x)

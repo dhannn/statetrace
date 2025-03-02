@@ -63,10 +63,34 @@ class Machine:
             return next_state
 
     def write(self, arg, transitions):
-        memory_type = self.memory[arg]['type']
         content = self.memory[arg]['content']
+        memory_type = self.memory[arg]['type']
+
+        if memory_type == 'STACK':
+            # if len(content) > 0:
+            print(transitions)
+            if len(transitions) == 1:
+                symbol = list(transitions)[0]
+            next_state = transitions.get(symbol)
+            
+            if next_state == None:
+                raise Exception('AAAAAAAA')
+            content.append(symbol)
+            print(self.memory[arg]['content'])
+            return next_state
 
     def read(self, arg, transitions):
         memory_type = self.memory[arg]['type']
         content = self.memory[arg]['content']
-        top = content.pop()
+
+        if memory_type == 'STACK':
+            # if len(content) > 0:
+            top = content.pop()
+            print(transitions)
+            if top in list(transitions):
+                next_state = transitions.get(top)
+            
+            if next_state == None:
+                raise Exception('AAAAAAAA')
+            print(self.memory[arg]['content'])
+            return next_state

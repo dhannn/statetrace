@@ -15,8 +15,8 @@ export default function StateDiagram({ states, transitions, currentState }) {
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(states)
-            .force("charge", d3.forceManyBody().strength(-500))
-            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
+            .force("center", d3.forceCenter(width / 2, height / 2, 50))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
             .on("tick", ticked);
         
@@ -45,7 +45,19 @@ export default function StateDiagram({ states, transitions, currentState }) {
             .join("text")
             .text(d => d.id)
             .attr("x", 6)
-            .attr("y", 6);
+            .attr("y", 6)
+            .style('font-family', 'Inter')
+            .style('font-weight', 'bold');
+
+        // Labels (state names)
+        const commands = svg.append("g")
+            .selectAll("text")
+            .data(states)
+            .join("text")
+            .text(d => d.command)
+            .attr("x", 6)
+            .attr("y", 6)
+            .style('font-family', 'Fira Code');
 
         svg.append("defs").append("marker")
             .attr("id", "arrow")
@@ -66,8 +78,13 @@ export default function StateDiagram({ states, transitions, currentState }) {
             node.attr("cx", d => d.x)
                 .attr("cy", d => d.y);
     
-            label.attr("x", d => d.x - 10)
-                .attr("y", d => d.y + 5);
+            label.attr("x", d => d.x)
+                .attr("y", d => d.y)
+                .attr("text-anchor", "middle");
+
+            commands.attr('x', d => d.x)
+                .attr("y", d => d.y + 15)
+                .attr("text-anchor", "middle");
         }
 
         function drag(simulation) {
@@ -116,6 +133,7 @@ export default function StateDiagram({ states, transitions, currentState }) {
 
     return <div>
         <h2>State Diagram</h2>
+        <h4>Current State:</h4>
         <pre>{currentState}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>
     </div>

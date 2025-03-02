@@ -1,0 +1,20 @@
+.DATA
+STACK S1
+STACK S2
+STACK S3
+
+.LOGIC
+A] WRITE(S1) (#,B)
+B] SCAN RIGHT (a,C), (b,E)
+C] WRITE(S1) (X,B)
+D] WRITE(S2) (X,F)
+E] READ(S1) (X,D)
+F] SCAN RIGHT (b,F), (c,G)
+G] WRITE(S3) (#,H)
+H] SCAN RIGHT (c,G), (d,I)
+I] READ(S2) (X,J)
+J] SCAN LEFT (d,J), (#,K)
+K] READ(S1) (#,L)
+L] READ(S3) (#,accept)
+
+// Accepts a^nb^mc^md^n
