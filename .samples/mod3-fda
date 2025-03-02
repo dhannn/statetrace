@@ -1,0 +1,10 @@
+.LOGIC
+q00] SCAN (0,q10), (1,q01), (#,accept)
+q01] SCAN (0,q11), (1,q02), (#,reject)
+q02] SCAN (0,q12), (1,q00), (#,reject)
+q10] SCAN (0,q20), (1,q11), (#,reject)
+q11] SCAN (0,q21), (1,q12), (#,reject)
+q12] SCAN (0,q22), (1,q10), (#,reject)
+q20] SCAN (0,q00), (1,q21), (#,reject)
+q21] SCAN (0,q01), (1,q22), (#,reject)
+q22] SCAN (0,q02), (1,q20), (#,reject)

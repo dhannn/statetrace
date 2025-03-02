@@ -1,0 +1,51 @@
+import re
+from pprint import pprint
+
+# Define token types and patterns
+TOKEN_PATTERNS = [
+    ('DATA_SECTION', r'(\.DATA)\b'),
+    ('LOGIC_SECTION', r'(\.LOGIC)\b'),
+    ('STATE_NAME', r'\b\w+\]'), 
+    ('MEMORY_TYPE', r'\b(STACK)\b'),
+    ('COMMAND', r'\b(SCAN\b(LEFT|RIGHT)?|PRINT|WRITE|READ)\b'),
+    ('DIRECTION', r'\b(LEFT|RIGHT)\b'),
+    ('TRANSITION', r'\([\w#]+,[\w#]+\)'),
+    ('ARG', r'\([#\w]+\)'),
+    ('MEMORY_NAME', r'[#\w]+'),
+    ('DELIMITER', r'[,]'), 
+]
+
+# Compile regex patterns
+TOKEN_REGEX = [(name, re.compile(pattern)) for name, pattern in TOKEN_PATTERNS]
+
+def tokenize_line(line):
+    tokens = []
+    while line:
+        line = line.strip()
+        matched = False
+
+        for token_type, pattern in TOKEN_REGEX:
+            m = pattern.match(line)
+            
+            if m:
+                tokens.append((token_type, m.group(0)))
+                line = line[len(m.group(0)):]
+                matched = True
+                break
+        if not matched:
+            raise SyntaxError(f"Unexpected token: {line}")
+        
+    return tokens
+
+
+sample = """.DATA
+STACK S1
+
+.LOGIC
+A] WRITE    (S1)    (#,B)
+B] SCAN    (0,C),  (1,D)
+C] WRITE    (S1)    (#,B)
+D] READ     (S1)    (#,E)
+E] SCAN     (1,D),  (#,F)
+F] READ     (S1)    (#,accept)
+"""
