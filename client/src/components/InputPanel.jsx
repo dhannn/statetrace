@@ -8,6 +8,7 @@ export default function InputPanel(props) {
 
 
     return <div className='input-panel'>
+        <h1>StateTrace</h1>
         <h2>Input String</h2>
         <input onInput={(e) => {
             setInputString(e.target.value);

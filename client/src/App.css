@@ -1,42 +1,48 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  gap: 2.5vw;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.main-panel {
+  display: flex;
+  /* gap: 5vw; */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.machine-panel {
+  display: flex;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.input-panel {
+  width: 20vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #F7F0F0;
+  padding: 5vh 2.5vw;
 }
 
-.card {
-  padding: 2em;
+.middle-panel {
+  margin-top: 5vh;
+  width: 40vw;
 }
 
-.read-the-docs {
-  color: #888;
+.memory-panel {
+  margin-top: 5vh;
+  flex-direction: row;
+  width: 32.5vw;
+}
+
+.control-panel {
+  margin-top: 2vh;
+  margin-bottom: 1vh;
+}
+
+.control-panel button {
+  margin-right: 1vw;
 }

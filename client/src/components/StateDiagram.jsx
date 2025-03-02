@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
-const width = 400, height = 400;
+const width = 500, height = 500;
 export default function StateDiagram({ states, transitions, currentState }) {
     const svgRef = useRef();
 
@@ -34,7 +34,7 @@ export default function StateDiagram({ states, transitions, currentState }) {
             .data(states)
             .join("circle")
             .attr("r", 25)
-            .attr("fill", d => (d.id === currentState ? "red" : "steelblue")) // Highlight current state
+            .attr("fill", d => (d.id === currentState ? "#708B75" : "#30BCED")) // Highlight current state
             .call(drag(simulation));
 
 

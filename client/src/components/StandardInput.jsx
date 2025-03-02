@@ -33,8 +33,8 @@ export default function StandardInput({ inputString, tapeHead }) {
         squares.append("rect")
             .attr("width", squareSize)
             .attr("height", squareSize)
-            .attr("fill", (d, i) => i === tapeHead? 'green': 'white')
-            .attr("stroke", "black");
+            .attr("fill", (d, i) => i === tapeHead? '#708B75': '#FDFDFD')
+            .attr("stroke", "#484349");
 
         squares.append("text")
             .attr("x", squareSize / 2)
@@ -49,6 +49,6 @@ export default function StandardInput({ inputString, tapeHead }) {
 
     return <div>
         <h2 style={{'textAlign': 'center'}}>Input</h2>
-        <svg ref={svgRef} width={600} height={50}/>
+        <svg ref={svgRef} width={500} height={50}/>
     </div>
 }

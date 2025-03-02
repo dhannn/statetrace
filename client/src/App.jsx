@@ -16,6 +16,7 @@ function App() {
   const [ inputString, setInputString ] = useState('');
   const [ tapeHead, setTapeHead ] = useState(0);
   const [ currentState, setCurrentState ] = useState();
+  const [ isInitialized, setIsInitialized ] = useState(false);
 
   useEffect(() => {
     if (lastMessage) {      
@@ -27,7 +28,7 @@ function App() {
           setTransitions(data.transitions);
           setTapeHead(0);
           setCurrentState(data['current-state']);
-          
+          setIsInitialized(true);
           break;
         
         case 'run':
@@ -59,12 +60,22 @@ function App() {
 
   return (
     <>
-      <h1>StateTrace</h1>
-      <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
-      <div className='machine-panel'>
-        <InputPanel onLoad={ onLoad } onRun={ onRun }/>
-        <StateDiagram states={states} transitions={transitions} currentState={currentState}/>
-      </div>
+      <InputPanel onLoad={ onLoad } onRun={ onRun }/>
+      { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
+          <h2>Simulate an abstract machine!</h2>
+          <p>Simply define the machine and test it on an input string.</p>
+        </div>: <>
+      
+        <div className='middle-panel'>
+          <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
+          <StateDiagram states={states} transitions={transitions} currentState={currentState}/>
+        </div>
+        <div className='memory-panel'>
+          <h2>Memory</h2>
+          <p>Test</p>
+        </div>
+      </>
+      }
     </>
   )
 }
