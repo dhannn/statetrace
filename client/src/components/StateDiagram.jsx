@@ -91,7 +91,7 @@ export default function StateDiagram({ states, transitions, currentState }) {
         function getCurvedPath(source, target) {
             if (source.id === target.id) {
                 // Self-loop (make a small circular path)
-                const radius = 30;
+                const radius = 20;
                 return `M ${source.x} ${source.y - radius} 
                         C ${source.x - 40} ${source.y - 60}, 
                           ${source.x + 40} ${source.y - 60}, 
