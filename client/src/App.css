@@ -13,6 +13,21 @@
   /* gap: 5vw; */
 }
 
+.error-modal {
+  position: absolute;
+  width: 25vw;
+  padding: 2.5vh 2.5vw;
+  background-color: #484349;
+  color: #F7F0F0;
+  border: gray solid 1px;
+  border-radius: 5px;
+  bottom: 5vh;
+  right: 5vh;
+  line-height: 1.5em;
+  text-align: left;
+  
+}
+
 .machine-panel {
   display: flex;
 }

@@ -1,0 +1,44 @@
+.DATA
+STACK S1
+STACK S2
+STACK S3
+STACK S4
+
+.LOGIC
+; -- Initialization: Seed S1 and S4 with bottom markers
+A] WRITE(S1) (#,A1)
+A1] WRITE(S4) (#,B)
+
+; -- Phase 1: Process a’s.
+; In state B the head scans right. For every a encountered,go to B1 to push it onto S1.
+B] SCAN RIGHT (a,B1),(b,F),(#,reject)
+B1] WRITE(S1) (a,B)
+
+; -- Phase 2: Process b’s.
+; In state F the head scans right. When a b is seen,go to G to pop an a from S1.
+; (If a c is encountered,the a’s are done; but first S1 must be “empty”.)
+F] SCAN RIGHT (b,G),(c,H1)
+G] READ(S1) (a,G1)
+G1] WRITE(S2) (b,F)
+; Transition from b’s to c’s: Check that S1 is empty.
+H1] READ(S1) (#,H)
+
+; -- Phase 3: Process c’s.
+; In state H the head scans right. For every c,go to I to pop a b from S2.
+; (If a d is encountered,then b’s are finished; first S2 must be empty.)
+H] SCAN RIGHT (c,I),(d,J1)
+I] READ(S2) (b,I1)
+I1] WRITE(S3) (c,H)
+; Transition from c’s to d’s: Check that S2 is empty.
+J1] READ(S2) (#,J)
+
+; -- Phase 4: Process d’s.
+; In state J the head scans right. For every d,go to K to pop a c from S3.
+; When the right boundary “#” is reached,S3 must be empty.
+J] SCAN RIGHT (d,K),(#,M1)
+K] READ(S3) (c,K1)
+K1] WRITE(S4) (d,J)
+M1] READ(S3) (#,M)
+
+; -- Final Check: Ensure S4 is empty (only the bottom marker remains)
+M] READ(S4) (#,accept)

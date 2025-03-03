@@ -5,6 +5,7 @@ import useWebSocket from "react-use-websocket";
 import StateDiagram from './components/StateDiagram';
 import StandardInput from './components/StandardInput';
 import MemoryPanel from './components/MemoryPanel';
+import ErrorModal from './components/ErrorModal';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
   const [ tapeHead, setTapeHead ] = useState(0);
   const [ currentState, setCurrentState ] = useState();
   const [ memoryObjects, setMemoryObjects ] = useState([]);
+  const [ error, setError ] = useState('');
   const [ isInitialized, setIsInitialized ] = useState(false);
 
   useEffect(() => {
@@ -32,12 +34,18 @@ function App() {
           setCurrentState(data['current-state']);
           setIsInitialized(true);
           setMemoryObjects(data['memory'])
+          setError('')
           break;
           
         case 'run':
+          setError('')
           setTapeHead(data['input-head']);
           setCurrentState(data['current-state']);
           setMemoryObjects(data['memory'])
+          break;
+        
+        case 'error':
+          setError(data['error'])
           break;
 
         default:
@@ -64,6 +72,7 @@ function App() {
 
   return (
     <>
+      { error !== '' && <ErrorModal error={error} /> }
       <InputPanel onLoad={ onLoad } onRun={ onRun }/>
       { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
           <h2>Simulate an abstract machine!</h2>
