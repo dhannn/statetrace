@@ -65,7 +65,7 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     return machine
 
 async def run(websocket: WebSocket, machine: Machine):
-    while machine.state != 'accept' and machine.state != 'reject':
+    while machine.state != 'accept' and machine.state != 'reject' and machine.state != None:
         await asyncio.sleep(1)
         machine.next()
         memory_objects = [ {
@@ -113,6 +113,6 @@ async def websocket_endpoint(websocket: WebSocket):
             elif res_type == 'run':
                 await run(websocket, machine)
     except Exception as e:
-        logger.error(f'Error connecting WebSockets: {e.msg}')
+        logger.error(f'Error connecting WebSockets: {e}')
     finally:
         logger.warning('Client disconnected')

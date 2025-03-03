@@ -6,6 +6,7 @@ import StateDiagram from './components/StateDiagram';
 import StandardInput from './components/StandardInput';
 import MemoryPanel from './components/MemoryPanel';
 import ErrorModal from './components/ErrorModal';
+import Modal from './components/Modal';
 
 function App() {
 
@@ -73,17 +74,18 @@ function App() {
   return (
     <>
       { error !== '' && <ErrorModal error={error} /> }
+      { currentState === null && <Modal msg='Cannot find next state. String rejected!'/> }
       <InputPanel onLoad={ onLoad } onRun={ onRun }/>
       { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
           <h2>Simulate an abstract machine!</h2>
-          <p>Simply define the machine and test it on an input string.</p>
+        <p>Simply define the machine and test it on an input string.</p>
         </div>: <>
       
         <div className='middle-panel'>
           <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
           <StateDiagram states={states} transitions={transitions} currentState={currentState}/>
         </div>
-
+        
         <MemoryPanel memory={memoryObjects}/>
       </>
       }

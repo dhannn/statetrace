@@ -1,5 +1,7 @@
 from collections import deque
 
+from loguru import logger
+
 class Machine:
 
     def __init__(self, definition):
@@ -47,8 +49,6 @@ class Machine:
             current_symbol = self.input[self.tape_head]
             next_state = transitions.get(current_symbol, None)
             
-            if next_state == None:
-                raise Exception('AAAAAAAA')
             return next_state
 
     def scan_left(self, arg, transitions):
@@ -57,8 +57,6 @@ class Machine:
             current_symbol = self.input[self.tape_head]
             next_state = transitions.get(current_symbol, None)
             
-            if next_state == None:
-                raise Exception('AAAAAAAA')
             return next_state
 
     def write(self, arg, transitions):
@@ -69,10 +67,8 @@ class Machine:
             # if len(content) > 0:
             if len(transitions) == 1:
                 symbol = list(transitions)[0]
-            next_state = transitions.get(symbol)
+            next_state = transitions.get(symbol, None)
             
-            if next_state == None:
-                raise Exception('AAAAAAAA')
             content.append(symbol)
             return next_state
 
@@ -82,10 +78,11 @@ class Machine:
 
         if memory_type == 'STACK':
             # if len(content) > 0:
+            logger.debug(content)
             top = content.pop()
             if top in list(transitions):
                 next_state = transitions.get(top)
+            else:
+                next_state = None
             
-            if next_state == None:
-                raise Exception('AAAAAAAA')
             return next_state

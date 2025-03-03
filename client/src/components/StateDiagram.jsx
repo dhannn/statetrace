@@ -12,10 +12,18 @@ export default function StateDiagram({ states, transitions, currentState }) {
             .attr("viewBox", [0, 0, width, height])
             .style("font", "12px sans-serif");
 
+
+        const states_num = states.length;
+        console.log(states.length);
+        
+        const dist = 50 + (150 /(0.25 * states_num))
+        console.log(dist);
+        
+
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(states)
-            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
+            .force("charge", d3.forceManyBody().strength(-500).distanceMax(dist))
             .force("center", d3.forceCenter(width / 2, height / 2, 50))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
             .on("tick", ticked);

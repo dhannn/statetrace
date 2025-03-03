@@ -25,7 +25,14 @@
   right: 5vh;
   line-height: 1.5em;
   text-align: left;
-  
+  opacity: 0.9;
+}
+
+.error-modal pre {
+  display: inline;
+  padding: 0.5vh;
+  letter-spacing: 0;
+  background-color: #FC5130;
 }
 
 .machine-panel {
