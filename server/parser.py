@@ -47,6 +47,10 @@ class FSMParser:
     def parse(self):
         while self.current_index < len(self.tokens):
             token_type, token_value = self.next_token()
+            
+            if token_type == 'COMMENT':
+                continue
+
             print(f'Currently doing ({token_type},{token_value})')
             self.handle_state(token_type, token_value)
         return self.parsed_data

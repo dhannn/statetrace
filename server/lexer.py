@@ -9,6 +9,7 @@ TOKEN_PATTERNS = [
     ('MEMORY_TYPE', r'\b(STACK)\b'),
     ('COMMAND', r'\b(SCAN\s*(LEFT|RIGHT)?|PRINT|WRITE|READ)\b'),
     ('TRANSITION', r'\([\w#]+,[\w#]+\)'),
+    ('COMMENT', r';\s*[ \S]+'),
     ('ARG', r'\([#\w]+\)'),
     ('MEMORY_NAME', r'[#\w]+'),
     ('DELIMITER', r'[,]'), 
