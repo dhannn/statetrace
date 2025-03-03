@@ -1,5 +1,4 @@
 import re
-from pprint import pprint
 
 # Define token types and patterns
 TOKEN_PATTERNS = [
@@ -35,7 +34,6 @@ def tokenize_line(line):
         if not matched:
             raise SyntaxError(f"Unexpected token: {line}")
         
-    print(tokens)
     return tokens
 
 

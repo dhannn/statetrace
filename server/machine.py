@@ -43,7 +43,6 @@ class Machine:
 
     def scan(self, arg, transitions):
         self.tape_head += 1
-        print(self.input)
         if self.input is not None:
             current_symbol = self.input[self.tape_head]
             next_state = transitions.get(current_symbol, None)
@@ -68,7 +67,6 @@ class Machine:
 
         if memory_type == 'STACK':
             # if len(content) > 0:
-            print(transitions)
             if len(transitions) == 1:
                 symbol = list(transitions)[0]
             next_state = transitions.get(symbol)
@@ -76,7 +74,6 @@ class Machine:
             if next_state == None:
                 raise Exception('AAAAAAAA')
             content.append(symbol)
-            print(self.memory[arg]['content'])
             return next_state
 
     def read(self, arg, transitions):
@@ -86,11 +83,9 @@ class Machine:
         if memory_type == 'STACK':
             # if len(content) > 0:
             top = content.pop()
-            print(transitions)
             if top in list(transitions):
                 next_state = transitions.get(top)
             
             if next_state == None:
                 raise Exception('AAAAAAAA')
-            print(self.memory[arg]['content'])
             return next_state

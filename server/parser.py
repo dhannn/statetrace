@@ -1,4 +1,3 @@
-from pprint import pprint
 from machine import *
 
 class FSMParser:
@@ -51,7 +50,6 @@ class FSMParser:
             if token_type == 'COMMENT':
                 continue
 
-            print(f'Currently doing ({token_type},{token_value})')
             self.handle_state(token_type, token_value)
         return self.parsed_data
 

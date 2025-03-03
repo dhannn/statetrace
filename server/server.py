@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, WebSocket
 import json
+from loguru import logger
 import asyncio
 
 from lexer import *
@@ -7,14 +8,19 @@ from parser import *
 
 app = FastAPI()
 
+logger.add('server.log', rotation='10 MB', level='INFO')
+
 async def load(websocket: WebSocket, input_string, machine_definition):
     tokens = []
     
     for line in machine_definition.splitlines():
-        tokens.extend(tokenize_line(line))
+        tokenized_line = tokenize_line(line)
+        logger.info(f'Tokenizing machine definition: {tokenized_line}')
+        tokens.extend(tokenized_line)
     
     parser = FSMParser(tokens)
     machine_definition = parser.parse()
+    logger.info(f'Parsing tokens: {machine_definition}')
     machine = Machine(machine_definition)
     machine.set_input(input_string)
 
@@ -52,6 +58,8 @@ async def load(websocket: WebSocket, input_string, machine_definition):
         'type': 'load'
     })
 
+    logger.info(f'Machine successfully loaded')
+
     await websocket.send_text(x)
     
     return machine
@@ -72,28 +80,39 @@ async def run(websocket: WebSocket, machine: Machine):
             'memory': memory_objects,
             'type': 'run'
         })
+        logger.info(f'Running machine: {x}')
         await websocket.send_text(x)
 
 
 @app.websocket('/ws')
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    
-    machine = None
+    try:
+        await websocket.accept()
+        logger.info('Client connected to WebSocket')
+        machine = None
 
-    while True:
-        response = json.loads((await websocket.receive())['text'])
-        res_type = response['type']
-        if res_type == 'load':
+        while True:
+            response = json.loads((await websocket.receive())['text'])
+            logger.info(f'Received input: { response }')
 
-            try:
-                input_string = response['input-string']
-                machine_definition = response['machine-definition']
-            except SyntaxError as e:
-                await websocket.send_json(e)
+            res_type = response['type']
+            if res_type == 'load':
 
-            machine = await load(websocket, input_string, machine_definition)
-        elif res_type == 'run':
-            await run(websocket, machine)
+                try:
+                    input_string = response['input-string']
+                    machine_definition = response['machine-definition']
+                    machine = await load(websocket, input_string, machine_definition)
+                except SyntaxError as e:
+                    logger.error(e.msg)
+                    x = json.dumps({
+                        'type': 'error',
+                        'error': e.msg
+                    })
+                    await websocket.send_text(x)
 
-        print(res_type, input_string, machine_definition)
+            elif res_type == 'run':
+                await run(websocket, machine)
+    except Exception as e:
+        logger.error(f'Error connecting WebSockets: {e.msg}')
+    finally:
+        logger.warning('Client disconnected')
