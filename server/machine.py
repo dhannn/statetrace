@@ -15,7 +15,7 @@ class Machine:
         }
 
         self.tape_head = 0
-        self.state = list(definition['states'].keys())[0]
+        self.active_states = { list(definition['states'].keys())[0] }
         self.states = definition['states']
 
         self.memory = {}
@@ -36,53 +36,51 @@ class Machine:
         self.input = '#' + str_input + '#'
 
     def next(self):
-        state = self.states[self.state]
-        command = self.commands[state['command']]
-        arg = state['arg']
-        transitions = state['transitions']
-        next_state = command(arg=arg, transitions=transitions)
-        self.state = next_state
+        new_active_states = set()
+        is_done = False
+        for state in self.active_states:
 
-    def scan(self, arg, transitions):
-        self.tape_head += 1
+            state = self.states[state]
+            command = self.commands[state['command']]
+            arg = state['arg']
+            transitions = state['transitions']
+
+            # Get possible next states (could be multiple)
+            possible_next_states = command(arg=arg, transitions=transitions, is_done=is_done)
+            new_active_states.update(possible_next_states)
+            is_done = True
+            
+        self.active_states = new_active_states
+
+    def scan(self, arg, transitions, is_done):
+        if not is_done:
+            self.tape_head += 1
+
         if self.input is not None:
             current_symbol = self.input[self.tape_head]
-            next_state = transitions.get(current_symbol, None)
-            
-            return next_state
+            return transitions.get(current_symbol, set())  # Return a set of next states
 
     def scan_left(self, arg, transitions):
         self.tape_head -= 1
         if self.input is not None:
             current_symbol = self.input[self.tape_head]
-            next_state = transitions.get(current_symbol, None)
-            
-            return next_state
+            return transitions.get(current_symbol, set())
 
     def write(self, arg, transitions):
         content = self.memory[arg]['content']
         memory_type = self.memory[arg]['type']
 
         if memory_type == 'STACK':
-            # if len(content) > 0:
-            if len(transitions) == 1:
-                symbol = list(transitions)[0]
-            next_state = transitions.get(symbol, None)
-            
+            symbols = list(transitions.keys())
+            for symbol in symbols:
+                pass
             content.append(symbol)
-            return next_state
+            return set(transitions[symbol])  # Return a set of next states
 
     def read(self, arg, transitions):
         memory_type = self.memory[arg]['type']
         content = self.memory[arg]['content']
 
-        if memory_type == 'STACK':
-            # if len(content) > 0:
-            logger.debug(content)
+        if memory_type == 'STACK' and content:
             top = content.pop()
-            if top in list(transitions):
-                next_state = transitions.get(top)
-            else:
-                next_state = None
-            
-            return next_state
+            return set(transitions.get(top, []))  # Return a set of next states

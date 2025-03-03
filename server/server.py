@@ -29,13 +29,14 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     for state in machine.states:
         stateSet.add(state)
 
-        for transition in machine.states[state]['transitions']:
-            next_state = machine.states[state]['transitions'][transition]
-            stateSet.add(next_state)
-            transitions.append({
-                'source': state,
-                'target': next_state
-            })
+        for symbol in machine.states[state]['transitions']:
+            next_states = machine.states[state]['transitions'][symbol]
+            for next_state in next_states:
+                stateSet.add(next_state)
+                transitions.append({
+                    'source': state,
+                    'target': next_state
+                })
     
     states = []
     for state in stateSet:
@@ -54,10 +55,9 @@ async def load(websocket: WebSocket, input_string, machine_definition):
         'memory': memory_objects,
         'states': states,
         'transitions': transitions,
-        'current-state': machine.state,
+        'active-states': list(machine.active_states),
         'type': 'load'
     })
-
     logger.info(f'Machine successfully loaded')
 
     await websocket.send_text(x)
@@ -65,7 +65,7 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     return machine
 
 async def run(websocket: WebSocket, machine: Machine):
-    while machine.state != 'accept' and machine.state != 'reject' and machine.state != None:
+    while'accept' not in machine.active_states and 'reject' not in machine.active_states and len(machine.active_states) > 0:
         await asyncio.sleep(1)
         machine.next()
         memory_objects = [ {
@@ -74,9 +74,8 @@ async def run(websocket: WebSocket, machine: Machine):
             'content': machine.memory[name]['content'] 
         } for name in machine.memory ]
         x = json.dumps({
-            'state': machine.state,
             'input-head': machine.tape_head,
-            'current-state': machine.state,
+            'active-states': list(machine.active_states),
             'memory': memory_objects,
             'type': 'run'
         })

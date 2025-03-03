@@ -98,7 +98,13 @@ class FSMParser:
 
     def handle_transition(self, token_type, token_value):
         symbol, state = (token_value[1:-1]).split(',')
-        self.parsed_data['states'][self.current_state_name]['transitions'][symbol.strip()] = state.strip()
+        symbol = symbol.strip()
+        state = state.strip()
+        
+        if symbol not in self.parsed_data['states'][self.current_state_name]['transitions']:
+            self.parsed_data['states'][self.current_state_name]['transitions'][symbol] = []
+
+        self.parsed_data['states'][self.current_state_name]['transitions'][symbol].append(state)
         
 
     def handle_delimiter(self, token_type, token_value):

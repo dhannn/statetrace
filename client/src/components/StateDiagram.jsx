@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
 const width = 500, height = 500;
-export default function StateDiagram({ states, transitions, currentState }) {
+export default function StateDiagram({ states, transitions, activeStates }) {
     const svgRef = useRef();
 
     useEffect(() => {
-        console.log(currentState);
+        console.log(activeStates);
 
         const svg = d3.select(svgRef.current)
             .attr("viewBox", [0, 0, width, height])
@@ -42,7 +42,7 @@ export default function StateDiagram({ states, transitions, currentState }) {
             .data(states)
             .join("circle")
             .attr("r", 25)
-            .attr("fill", d => (d.id === currentState ? "#708B75" : "#30BCED")) // Highlight current state
+            .attr("fill", d => (activeStates.includes(d.id)? "#708B75" : "#30BCED")) // Highlight current state
             .call(drag(simulation));
 
 
@@ -137,12 +137,12 @@ export default function StateDiagram({ states, transitions, currentState }) {
                           ${target.x - offsetX},${target.y - offsetY}`;
             }
         }
-    }, [states, transitions, currentState]);
+    }, [states, transitions, activeStates]);
 
     return <div>
         <h2>State Diagram</h2>
         <h4 style={{marginBottom: '0.5vh'}}>Current State:</h4>
-        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{currentState === null? 'Implicit Rejection': currentState}</pre>
+        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0? 'Implicit Rejection': activeStates}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>
     </div>
 }

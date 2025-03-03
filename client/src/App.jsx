@@ -18,7 +18,7 @@ function App() {
   const [ transitions, setTransitions ] = useState([]);
   const [ inputString, setInputString ] = useState('');
   const [ tapeHead, setTapeHead ] = useState(0);
-  const [ currentState, setCurrentState ] = useState();
+  const [ activeStates, setActiveStates ] = useState([]);
   const [ memoryObjects, setMemoryObjects ] = useState([]);
   const [ error, setError ] = useState('');
   const [ isInitialized, setIsInitialized ] = useState(false);
@@ -32,16 +32,17 @@ function App() {
           setStates(data.states);
           setTransitions(data.transitions);
           setTapeHead(0);
-          setCurrentState(data['current-state']);
+          setActiveStates(data['active-states']);
           setIsInitialized(true);
           setMemoryObjects(data['memory'])
-          setError('')
+          setError('');
+          
           break;
           
         case 'run':
           setError('')
           setTapeHead(data['input-head']);
-          setCurrentState(data['current-state']);
+          setActiveStates(data['active-states']);
           setMemoryObjects(data['memory'])
           break;
         
@@ -54,6 +55,9 @@ function App() {
       }
     }
   }, [lastMessage])
+
+  console.log(activeStates);
+  
   
   const onLoad = (inputString, machineDefinition) => {
     const mess = JSON.stringify({
@@ -74,7 +78,7 @@ function App() {
   return (
     <>
       { error !== '' && <ErrorModal error={error} /> }
-      { currentState === null && <Modal msg='Cannot find next state. String rejected!'/> }
+      { activeStates.length === 0 && <Modal msg='Cannot find next state. String rejected!'/> }
       <InputPanel onLoad={ onLoad } onRun={ onRun }/>
       { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
           <h2>Simulate an abstract machine!</h2>
@@ -83,7 +87,7 @@ function App() {
       
         <div className='middle-panel'>
           <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
-          <StateDiagram states={states} transitions={transitions} currentState={currentState}/>
+          <StateDiagram states={states} transitions={transitions} activeStates={activeStates}/>
         </div>
         
         <MemoryPanel memory={memoryObjects}/>
