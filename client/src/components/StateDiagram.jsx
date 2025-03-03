@@ -141,8 +141,8 @@ export default function StateDiagram({ states, transitions, currentState }) {
 
     return <div>
         <h2>State Diagram</h2>
-        <h4>Current State:</h4>
-        <pre>{currentState}</pre>
+        <h4 style={{marginBottom: '0.5vh'}}>Current State:</h4>
+        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{currentState === null? 'Implicit Rejection': currentState}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>
     </div>
 }
