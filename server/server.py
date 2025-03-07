@@ -35,7 +35,8 @@ async def load(websocket: WebSocket, input_string, machine_definition):
                 stateSet.add(next_state)
                 transitions.append({
                     'source': state,
-                    'target': next_state
+                    'target': next_state,
+                    'label': symbol
                 })
     
     states = []
@@ -49,7 +50,7 @@ async def load(websocket: WebSocket, input_string, machine_definition):
         
         states.append(s)
 
-    memory_objects = [ {'id': name, 'type': machine.memory[name]['type']} for name in machine.memory ]
+    memory_objects = machine.memory_snapshot
 
     x = json.dumps({
         'memory': memory_objects,

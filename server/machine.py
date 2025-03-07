@@ -1,4 +1,5 @@
 from collections import deque
+from pprint import pprint
 
 from loguru import logger
 
@@ -17,8 +18,12 @@ class Machine:
         self.tape_head = 0
         self.active_states = { list(definition['states'].keys())[0] }
         self.states = definition['states']
-
-        self.memory = {}
+        self.memory_types = {}
+        self.memory_snapshot = []
+        initial_snapshot = {
+            'STACK': []
+        }
+        
         for _name, _type in definition['memory'].items():
 
             content = None
@@ -26,18 +31,28 @@ class Machine:
                 content = []
             elif _type == 'QUEUE':
                 content = deque()
-
-            self.memory[_name] = {
-                'type': _type,
+            
+            initial_snapshot[_type].append({
+                'name': _name,
                 'content': content
-            }
+            })
+            self.memory_types[_name] = _type
+            logger.debug(f'initial_snapshot[[{_type}]: {initial_snapshot[_type]}')
+
+        
+        self.memory_snapshot.append(initial_snapshot)
+        logger.debug(f'memory_snapshot: {self.memory_snapshot}')
 
     def set_input(self, str_input):
         self.input = '#' + str_input + '#'
 
     def next(self):
+        new_memory_states = {}
         new_active_states = set()
         is_done = False
+        
+        print('Transitions', self.states)
+
         for state in self.active_states:
 
             state = self.states[state]
@@ -46,7 +61,16 @@ class Machine:
             transitions = state['transitions']
 
             # Get possible next states (could be multiple)
+            memory_snapshot = self.memory_snapshot
+            logger.debug(f'Memory Snapshot: { memory_snapshot }')
             possible_next_states = command(arg=arg, transitions=transitions, is_done=is_done)
+
+            for next_state, new_memory in possible_next_states:
+                new_active_states.add(next_state)
+                new_memory_states[next_state] = new_memory
+
+            logger.debug(f'New Memory: { new_memory_states }')
+
             new_active_states.update(possible_next_states)
             is_done = True
             
@@ -58,29 +82,19 @@ class Machine:
 
         if self.input is not None:
             current_symbol = self.input[self.tape_head]
-            return transitions.get(current_symbol, set())  # Return a set of next states
+            print('scan()', transitions.get(current_symbol, set()))
+            return transitions.get(current_symbol, set()),  # Return a set of next states
 
-    def scan_left(self, arg, transitions):
-        self.tape_head -= 1
+    def scan_left(self, arg, transitions, is_done):
+        if not is_done:
+            self.tape_head -= 1
+
         if self.input is not None:
             current_symbol = self.input[self.tape_head]
-            return transitions.get(current_symbol, set())
+            return transitions.get(current_symbol, set()),
 
-    def write(self, arg, transitions):
-        content = self.memory[arg]['content']
-        memory_type = self.memory[arg]['type']
+    def write(self, arg, transitions, is_done):
+        pass
 
-        if memory_type == 'STACK':
-            symbols = list(transitions.keys())
-            for symbol in symbols:
-                pass
-            content.append(symbol)
-            return set(transitions[symbol])  # Return a set of next states
-
-    def read(self, arg, transitions):
-        memory_type = self.memory[arg]['type']
-        content = self.memory[arg]['content']
-
-        if memory_type == 'STACK' and content:
-            top = content.pop()
-            return set(transitions.get(top, []))  # Return a set of next states
+    def read(self, arg, transitions, is_done):
+        pass

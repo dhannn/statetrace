@@ -36,6 +36,8 @@ function App() {
           setIsInitialized(true);
           setMemoryObjects(data['memory'])
           setError('');
+          console.log(data);
+          
           
           break;
           
@@ -78,7 +80,7 @@ function App() {
   return (
     <>
       { error !== '' && <ErrorModal error={error} /> }
-      { activeStates.length === 0 && <Modal msg='Cannot find next state. String rejected!'/> }
+      { activeStates.length === 0 && isInitialized && <Modal msg='Cannot find next state. String rejected!'/> }
       <InputPanel onLoad={ onLoad } onRun={ onRun }/>
       { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
           <h2>Simulate an abstract machine!</h2>

@@ -1,4 +1,8 @@
 .LOGIC
-q0] SCAN (0,q0), (1,q1), (1,accept)
-q1] SCAN (0,q0), (1,q2)
-q2] SCAN (0,q0), (1,q1), (1,accept)
+q0] SCAN (a,q0), (b,q0), (a,q1), (b,q4)  ; Start state: can loop or begin "aba"/"bab" patterns
+q1] SCAN (b,q2)                           ; "a" seen, looking for "b" next in "aba" pattern
+q2] SCAN (a,q3)                           ; "ab" seen, looking for "a" next to complete "aba"
+q3] SCAN (a,q3), (b,q3), (#,accept)       ; "aba" found! Accept at end or keep reading
+q4] SCAN (a,q5)                           ; "b" seen, looking for "a" next in "bab" pattern
+q5] SCAN (b,q6)                           ; "ba" seen, looking for "b" next to complete "bab"
+q6] SCAN (a,q6), (b,q6), (#,accept)       ; "bab" found! Accept at end or keep reading

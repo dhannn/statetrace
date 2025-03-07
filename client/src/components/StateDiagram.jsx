@@ -16,7 +16,7 @@ export default function StateDiagram({ states, transitions, activeStates }) {
         const states_num = states.length;
         console.log(states.length);
         
-        const dist = 50 + (150 /(0.25 * states_num))
+        const dist = 50 + (150 /(0.05 * states_num))
         console.log(dist);
         
 
@@ -67,6 +67,15 @@ export default function StateDiagram({ states, transitions, activeStates }) {
             .attr("y", 6)
             .style('font-family', 'Fira Code');
 
+        const symbols = svg.append("g")
+            .selectAll("text")
+            .data(transitions)
+            .join("text")
+            .text(d => { return d.label })
+            .attr("x", 6)
+            .attr("y", 6)
+            .style('font-family', 'Fira Code');
+
         svg.append("defs").append("marker")
             .attr("id", "arrow")
             .attr("viewBox", "0 0 10 10")
@@ -92,6 +101,10 @@ export default function StateDiagram({ states, transitions, activeStates }) {
 
             commands.attr('x', d => d.x)
                 .attr("y", d => d.y + 15)
+                .attr("text-anchor", "middle");
+            
+            symbols.attr('x', d => d.source.x === d.target.x? d.source.x: (d.source.x + d.target.x) / 2)
+                .attr("y", d => d.source.y === d.target.y? d.source.y - (dist/25):(d.source.y + d.target.y) / 2)
                 .attr("text-anchor", "middle");
         }
 
