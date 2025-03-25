@@ -1,24 +1,52 @@
 import React, { useEffect, useState } from "react";
 import StackComponent from "./StackComponent";
+import QueueComponent from "./QueueComponent";
 
 export default function MemoryPanel({ memory }) {
     
     const [ stacks, setStacks ] = useState([]);
+    const [ queues, setQueues ] = useState([]);
     const [ currentExecutionPath, setCurrentExecutionPath ] = useState(0);
     const [ executionPathSelect, setExecutionPathSelect ] = useState([]);
 
     useEffect(() => {
+
+        
         const executionPaths = memory.map((mem, i) => {
             return <option key={i} value={i}>Execution Path: {i}</option>;
         });
-
-        const _stacks = memory[currentExecutionPath]['STACK'].map(s => {
-            return <StackComponent name={s.name} content={s.content}/>;
-        });
-        console.log(memory[currentExecutionPath]['STACK']);
+        setExecutionPathSelect(executionPaths);
         
-        setStacks(_stacks);
-        setExecutionPathSelect(executionPaths)
+
+        let stack_info = [];
+        let queue_info = [];
+        
+        for (const mem_name in memory[currentExecutionPath]) {
+            const mem = memory[currentExecutionPath][mem_name];
+            switch (mem.type) {
+                case 'STACK':
+                    stack_info.push({
+                        'name': mem_name,
+                        'content': mem.content
+                    });
+                    
+                    break;
+                case 'QUEUE':
+                    queue_info.push({
+                        'name': mem_name,
+                        'content': mem.content
+                    });
+                    
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+
+        console.log('Stack info', stack_info);
+        setStacks(stack_info.map(s => <StackComponent name={s.name} content={s.content}/>));
+        setQueues(queue_info.map(s => <QueueComponent name={s.name} content={s.content}/>));
     }, [memory, currentExecutionPath])
 
     return (
@@ -33,6 +61,9 @@ export default function MemoryPanel({ memory }) {
                         </select>
                         <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
                             {stacks}
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                            {queues}
                         </div>
                     </>
                 }

@@ -6,6 +6,7 @@ export default function StandardInput({ inputString, tapeHead }) {
     const svgRef = useRef();
 
     useEffect(() => {
+        
         const width = inputString.length * 50, height = 50;
 
         const svg = d3.select(svgRef.current)
@@ -33,7 +34,7 @@ export default function StandardInput({ inputString, tapeHead }) {
         squares.append("rect")
             .attr("width", squareSize)
             .attr("height", squareSize)
-            .attr("fill", (d, i) => i === tapeHead? '#708B75': '#FDFDFD')
+            .attr("fill", (d, i) => tapeHead.includes(i)? '#708B75': '#FDFDFD')
             .attr("stroke", "#484349");
 
         squares.append("text")

@@ -14,10 +14,9 @@ function App() {
     shouldReconnect: () => true,
   });
 
-  const [ states, setStates ] = useState([]);
-  const [ transitions, setTransitions ] = useState([]);
+  const [ states, setStates ] = useState({});
   const [ inputString, setInputString ] = useState('');
-  const [ tapeHead, setTapeHead ] = useState(0);
+  const [ head, setHead ] = useState([0]);
   const [ activeStates, setActiveStates ] = useState([]);
   const [ memoryObjects, setMemoryObjects ] = useState([]);
   const [ error, setError ] = useState('');
@@ -28,25 +27,49 @@ function App() {
       const data = JSON.parse(lastMessage.data);
       
       switch (data.type) {
-        case 'load':
+        case 'load': {
+
+          const activeConfigs = JSON.parse(data['active-states']);
+          const activeStates = activeConfigs.map((x) => {
+            return x[0];
+          });
           setStates(data.states);
-          setTransitions(data.transitions);
-          setTapeHead(0);
-          setActiveStates(data['active-states']);
-          setIsInitialized(true);
-          setMemoryObjects(data['memory'])
+          setActiveStates(activeStates)
+          const activeHeads = activeConfigs.map((x) => {
+            return x[2];
+          });
+          setHead(activeHeads);
+          const activeMemoryObjects = activeConfigs.map((x) => {
+            return x[1];
+          });
+          setMemoryObjects(activeMemoryObjects);
+
           setError('');
-          console.log(data);
+          setIsInitialized(true);
+                    
+          break;
+
+        }
           
+        case 'run': 
+        case 'step': {
+          const activeConfigs = JSON.parse(data['active-states']);
+          const activeStates = activeConfigs.map((x) => {
+            return x[0];
+          });
+          setActiveStates(activeStates);
+          const activeMemoryObjects = activeConfigs.map((x) => {
+            return x[1];
+          });
+          const activeHeads = activeConfigs.map((x) => {
+            return x[2];
+          });
+          setHead(activeHeads);
+          setMemoryObjects(activeMemoryObjects);
+          console.log('Active Memory Objects:', activeMemoryObjects);
           
           break;
-          
-        case 'run':
-          setError('')
-          setTapeHead(data['input-head']);
-          setActiveStates(data['active-states']);
-          setMemoryObjects(data['memory'])
-          break;
+        }
         
         case 'error':
           setError(data['error'])
@@ -57,8 +80,6 @@ function App() {
       }
     }
   }, [lastMessage])
-
-  console.log(activeStates);
   
   
   const onLoad = (inputString, machineDefinition) => {
@@ -76,20 +97,26 @@ function App() {
       'type': 'run'
     }));
   }
+  
+  const onStep = () => {
+    sendMessage(JSON.stringify({
+      'type': 'step'
+    }));
+  }
 
   return (
     <>
       { error !== '' && <ErrorModal error={error} /> }
       { activeStates.length === 0 && isInitialized && <Modal msg='Cannot find next state. String rejected!'/> }
-      <InputPanel onLoad={ onLoad } onRun={ onRun }/>
+      <InputPanel onLoad={ onLoad } onRun={ onRun } onStep={onStep}/>
       { !isInitialized? <div style={{width: '60vw', marginTop: '15vh'}}>
           <h2>Simulate an abstract machine!</h2>
         <p>Simply define the machine and test it on an input string.</p>
         </div>: <>
       
         <div className='middle-panel'>
-          <StandardInput inputString={ inputString } tapeHead={tapeHead}/>
-          <StateDiagram states={states} transitions={transitions} activeStates={activeStates}/>
+          <StandardInput inputString={ inputString } tapeHead={head}/>
+          <StateDiagram states={states} activeStates={activeStates}/>
         </div>
         
         <MemoryPanel memory={memoryObjects}/>

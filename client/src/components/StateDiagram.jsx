@@ -2,27 +2,38 @@ import React, { useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
 const width = 500, height = 500;
-export default function StateDiagram({ states, transitions, activeStates }) {
+export default function StateDiagram({ states, activeStates }) {
     const svgRef = useRef();
 
     useEffect(() => {
         console.log(activeStates);
 
+        // Dynamically derive transitions from states object
+        const transitions = Object.entries(states).flatMap(([state, edges]) =>
+            Object.entries(edges).flatMap(([symbol, targets]) =>
+                targets.map(target => ({ source: state, target, label: symbol }))
+            )
+        );
+
+        console.log("Derived Transitions:", transitions);
+
         const svg = d3.select(svgRef.current)
             .attr("viewBox", [0, 0, width, height])
             .style("font", "12px sans-serif");
 
-
-        const states_num = states.length;
-        console.log(states.length);
+        const statesArray = Object.keys(states).map(id => ({ id }));
+        transitions.forEach(trans => {
+            if (!statesArray.some(s => s.id === trans.target)) {
+                statesArray.push({ id: trans.target }); // Wrap as an object
+            }
+        });
+        const states_num = statesArray.length;
         
-        const dist = 50 + (150 /(0.05 * states_num))
-        console.log(dist);
-        
+        const dist = 50 + (150 / (0.05 * states_num));
 
         svg.selectAll("*").remove();
 
-        const simulation = d3.forceSimulation(states)
+        const simulation = d3.forceSimulation(statesArray)
             .force("charge", d3.forceManyBody().strength(-500).distanceMax(dist))
             .force("center", d3.forceCenter(width / 2, height / 2, 50))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
@@ -39,17 +50,15 @@ export default function StateDiagram({ states, transitions, activeStates }) {
         
         const node = svg.append("g")
             .selectAll("circle")
-            .data(states)
+            .data(statesArray)
             .join("circle")
             .attr("r", 25)
-            .attr("fill", d => (activeStates.includes(d.id)? "#708B75" : "#30BCED")) // Highlight current state
+            .attr("fill", d => (activeStates.includes(d.id) ? "#708B75" : "#30BCED")) // Highlight current state
             .call(drag(simulation));
 
-
-        // Labels (state names)
         const label = svg.append("g")
             .selectAll("text")
-            .data(states)
+            .data(statesArray)
             .join("text")
             .text(d => d.id)
             .attr("x", 6)
@@ -57,21 +66,11 @@ export default function StateDiagram({ states, transitions, activeStates }) {
             .style('font-family', 'Inter')
             .style('font-weight', 'bold');
 
-        // Labels (state names)
-        const commands = svg.append("g")
-            .selectAll("text")
-            .data(states)
-            .join("text")
-            .text(d => d.command)
-            .attr("x", 6)
-            .attr("y", 6)
-            .style('font-family', 'Fira Code');
-
         const symbols = svg.append("g")
             .selectAll("text")
             .data(transitions)
             .join("text")
-            .text(d => { return d.label })
+            .text(d => d.label)
             .attr("x", 6)
             .attr("y", 6)
             .style('font-family', 'Fira Code');
@@ -87,7 +86,6 @@ export default function StateDiagram({ states, transitions, activeStates }) {
             .append("path")
             .attr("d", "M 0 0 L 10 5 L 0 10 z")
             .attr("fill", "#999");
-        
 
         function ticked() {
             link.attr("d", d => getCurvedPath(d.source, d.target));
@@ -99,50 +97,43 @@ export default function StateDiagram({ states, transitions, activeStates }) {
                 .attr("y", d => d.y)
                 .attr("text-anchor", "middle");
 
-            commands.attr('x', d => d.x)
-                .attr("y", d => d.y + 15)
-                .attr("text-anchor", "middle");
-            
-            symbols.attr('x', d => d.source.x === d.target.x? d.source.x: (d.source.x + d.target.x) / 2)
-                .attr("y", d => d.source.y === d.target.y? d.source.y - (dist/25):(d.source.y + d.target.y) / 2)
+            symbols.attr('x', d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2)
                 .attr("text-anchor", "middle");
         }
 
         function drag(simulation) {
-          return d3.drag()
-            .on("start", (event, d) => {
-              if (!event.active) simulation.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y;
-            })
-            .on("drag", (event, d) => {
-              d.fx = event.x;
-              d.fy = event.y;
-            })
-            .on("end", (event, d) => {
-              if (!event.active) simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-            });
+            return d3.drag()
+                .on("start", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                })
+                .on("drag", (event, d) => {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                })
+                .on("end", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                });
         }
 
         function getCurvedPath(source, target) {
             if (source.id === target.id) {
-                // Self-loop (make a small circular path)
                 const radius = 20;
                 return `M ${source.x} ${source.y - radius} 
                         C ${source.x - 40} ${source.y - 60}, 
                           ${source.x + 40} ${source.y - 60}, 
                           ${source.x} ${source.y - radius}`;
             } else {
-                // Normal curved transition (quadratic Bézier curve)
                 const dx = target.x - source.x;
                 const dy = target.y - source.y;
                 const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
 
-                // Ensure the arrow appears at the correct end of the path
                 const angle = Math.atan2(dy, dx);
-                const offsetX = Math.cos(angle) * 25; // Radius of the circle
+                const offsetX = Math.cos(angle) * 25;
                 const offsetY = Math.sin(angle) * 25;
 
                 return `M ${source.x + offsetX},${source.y + offsetY} 
@@ -150,12 +141,12 @@ export default function StateDiagram({ states, transitions, activeStates }) {
                           ${target.x - offsetX},${target.y - offsetY}`;
             }
         }
-    }, [states, transitions, activeStates]);
+    }, [states, activeStates]);
 
     return <div>
         <h2>State Diagram</h2>
         <h4 style={{marginBottom: '0.5vh'}}>Current State:</h4>
-        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0? 'Implicit Rejection': activeStates}</pre>
+        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0 ? 'Implicit Rejection' : activeStates}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>
-    </div>
+    </div>;
 }

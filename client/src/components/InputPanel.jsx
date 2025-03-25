@@ -22,7 +22,7 @@ export default function InputPanel(props) {
         <div className='control-panel'>
             <button onClick={ () => onLoad(inputString, machineDefinition) }>Load</button>
             <button onClick={ () => onRun() }>Run</button>
-            <button>Step</button>
+            <button onClick={ () => onStep() }>Step</button>
         </div>
     </div>;
 }

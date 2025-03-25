@@ -153,3 +153,34 @@ class FSMParser:
 #     ("TRANSITION", "(1,q0)"), ("DELIMITER", ","),
 #     ("TRANSITION", "(#,reject)")
 # ]
+# tokens = [
+#     ("LOGIC_SECTION", ".LOGIC"),
+
+#     ("STATE_NAME", "q0]"), ("COMMAND", "SCAN"),
+#     ("TRANSITION", "(0,q2)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(1,q1)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(#,accept)"),
+
+#     ("STATE_NAME", "q1]"), ("COMMAND", "SCAN"),
+#     ("TRANSITION", "(0,q3)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(1,q0)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(#,reject)"),
+
+#     ("STATE_NAME", "q2]"), ("COMMAND", "SCAN"),
+#     ("TRANSITION", "(0,q0)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(1,q3)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(#,reject)"),
+
+#     ("STATE_NAME", "q3]"), ("COMMAND", "SCAN"),
+#     ("TRANSITION", "(0,q1)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(1,q2)"), ("DELIMITER", ","),
+#     ("TRANSITION", "(#,reject)")
+# ]
+
+# parser = FSMParser(tokens)
+# # pprint(parser.parse())
+
+# m = Machine(parser.parse())
+# m.set_input('0110')
+
+# pprint(m.get_states())

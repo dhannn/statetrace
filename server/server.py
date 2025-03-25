@@ -5,6 +5,7 @@ import asyncio
 
 from lexer import *
 from parser import *
+from utils import DequeEncoder
 
 app = FastAPI()
 
@@ -21,44 +22,17 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     parser = FSMParser(tokens)
     machine_definition = parser.parse()
     logger.info(f'Parsing tokens: {machine_definition}')
+
     machine = Machine(machine_definition)
     machine.set_input(input_string)
 
-    stateSet = set()
-    transitions = []
-    for state in machine.states:
-        stateSet.add(state)
-
-        for symbol in machine.states[state]['transitions']:
-            next_states = machine.states[state]['transitions'][symbol]
-            for next_state in next_states:
-                stateSet.add(next_state)
-                transitions.append({
-                    'source': state,
-                    'target': next_state,
-                    'label': symbol
-                })
-    
-    states = []
-    for state in stateSet:
-        s = {
-            'id': state
-        }
-
-        if ss := machine.states.get(state, None):
-            s['command'] = ss['command']
-        
-        states.append(s)
-
-    memory_objects = machine.memory_snapshot
-
     x = json.dumps({
-        'memory': memory_objects,
-        'states': states,
-        'transitions': transitions,
-        'active-states': list(machine.active_states),
+        'memory': machine.memory,
+        'states': machine.get_states(),
+        'active-states': json.dumps(machine.worklist, cls=DequeEncoder),
         'type': 'load'
     })
+
     logger.info(f'Machine successfully loaded')
 
     await websocket.send_text(x)
@@ -66,20 +40,35 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     return machine
 
 async def run(websocket: WebSocket, machine: Machine):
-    while'accept' not in machine.active_states and 'reject' not in machine.active_states and len(machine.active_states) > 0:
+
+    states = [ config[0] for config in machine.worklist ]
+
+    while 'accept' not in states and 'reject' not in states and len(list(states)) > 0:
         await asyncio.sleep(1)
         machine.next()
-        memory_objects = [ {
-            'id': name, 
-            'type': machine.memory[name]['type'], 
-            'content': machine.memory[name]['content'] 
-        } for name in machine.memory ]
+        
         x = json.dumps({
-            'input-head': machine.tape_head,
-            'active-states': list(machine.active_states),
-            'memory': memory_objects,
+            'active-states': json.dumps(list(machine.worklist)),
             'type': 'run'
         })
+        
+        logger.info(f'Running machine: {x}')
+        states = [ config[0] for config in machine.worklist ]
+        await websocket.send_text(x)
+
+async def step(websocket: WebSocket, machine: Machine):
+
+    states = [ config[0] for config in machine.worklist ]
+
+    if 'accept' not in states and 'reject' not in states and len(list(states)) > 0:
+        await asyncio.sleep(1)
+        machine.next()
+        
+        x = json.dumps({
+            'active-states': json.dumps(list(machine.worklist)),
+            'type': 'step'
+        })
+        
         logger.info(f'Running machine: {x}')
         await websocket.send_text(x)
 
@@ -112,6 +101,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
             elif res_type == 'run':
                 await run(websocket, machine)
+
+            elif res_type == 'step':
+                await step(websocket, machine)
     except Exception as e:
         logger.error(f'Error connecting WebSockets: {e}')
     finally:

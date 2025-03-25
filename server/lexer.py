@@ -5,7 +5,7 @@ TOKEN_PATTERNS = [
     ('DATA_SECTION', r'(\.DATA)\b'),
     ('LOGIC_SECTION', r'(\.LOGIC)\b'),
     ('STATE_NAME', r'\b\w+\]'), 
-    ('MEMORY_TYPE', r'\b(STACK)\b'),
+    ('MEMORY_TYPE', r'\b(STACK|QUEUE)\b'),
     ('COMMAND', r'\b(SCAN\s*(LEFT|RIGHT)?|PRINT|WRITE|READ)\b'),
     ('TRANSITION', r'\([\w#]+\s*,\s*[\w#]+\)'),
     ('COMMENT', r';\s*[ \S]+'),
