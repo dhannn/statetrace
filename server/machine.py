@@ -96,6 +96,7 @@ class Machine:
         
         return explored
 
+
     def next(self):
         if not self.worklist:
             logger.info('All paths rejected')
@@ -173,3 +174,14 @@ class Machine:
             return [(state, deepcopy(memory), head_pos) for state in transitions.get(read_value, [])]
         return []
     
+    def right(self, arg, transitions, head_pos, memory):
+        pass
+    
+    def left(self, arg, transitions, head_pos, memory):
+        pass
+    
+    def up(self, arg, transitions, head_pos, memory):
+        pass
+    
+    def down(self, arg, transitions, head_pos, memory):
+        pass

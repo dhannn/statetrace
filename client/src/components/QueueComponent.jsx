@@ -8,7 +8,6 @@ export default function QueueComponent({ name, content }) {
     useEffect(() => {
         if (content !== undefined) {
             const width = content.length * 50, height = 50;
-            content.reverse()
             
             const svg = d3.select(svgRef.current)
                 .attr("viewBox", [0, 0, width, height])

@@ -1,0 +1,15 @@
+; Accepts the strings (a^n)(b^n)(c^n)
+
+.DATA
+QUEUE Q1
+
+.LOGIC
+q0] SCAN (a,q1), (b,q2)
+q1] WRITE(Q1) (A,q0)
+q2] READ(Q1) (A,q3)
+q3] WRITE(Q1) (B,q4)
+q4] SCAN (b,q2), (c,q5)
+q5] WRITE(Q1) (#,q6)
+q6] READ(Q1) (B,q7)
+q7] SCAN (c,q6), (#,q8)
+q8] READ(Q1) (#,accept)

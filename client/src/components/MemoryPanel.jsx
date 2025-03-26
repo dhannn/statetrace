@@ -11,13 +11,11 @@ export default function MemoryPanel({ memory }) {
 
     useEffect(() => {
 
-        
         const executionPaths = memory.map((mem, i) => {
             return <option key={i} value={i}>Execution Path: {i}</option>;
         });
         setExecutionPathSelect(executionPaths);
         
-
         let stack_info = [];
         let queue_info = [];
         
@@ -45,9 +43,9 @@ export default function MemoryPanel({ memory }) {
         }
 
         console.log('Stack info', stack_info);
-        setStacks(stack_info.map(s => <StackComponent name={s.name} content={s.content}/>));
-        setQueues(queue_info.map(s => <QueueComponent name={s.name} content={s.content}/>));
-    }, [memory, currentExecutionPath])
+        setStacks(stack_info.map(s => <StackComponent key={s.name} name={s.name} content={s.content}/>));
+        setQueues(queue_info.map(s => <QueueComponent key={s.name} name={s.name} content={s.content}/>));
+    }, [memory, currentExecutionPath]);
 
     return (
         <>

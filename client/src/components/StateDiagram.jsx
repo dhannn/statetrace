@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 const width = 500, height = 500;
 export default function StateDiagram({ states, activeStates }) {
     const svgRef = useRef();
+    const nodePositions = useRef({}); // Store node positions between updates
 
     useEffect(() => {
         console.log(activeStates);
@@ -15,17 +16,26 @@ export default function StateDiagram({ states, activeStates }) {
             )
         );
 
-        console.log("Derived Transitions:", transitions);
-
         const svg = d3.select(svgRef.current)
             .attr("viewBox", [0, 0, width, height])
             .style("font", "12px sans-serif");
 
-        const statesArray = Object.keys(states).map(id => ({ id }));
+        const statesArray = Object.keys(states).map(id => ({
+            id,
+            x: nodePositions.current[id]?.x || width / 2 + Math.random() * 100,
+            y: nodePositions.current[id]?.y || height / 2 + Math.random() * 100
+        }));
+    
         transitions.forEach(trans => {
+            
             if (!statesArray.some(s => s.id === trans.target)) {
-                statesArray.push({ id: trans.target }); // Wrap as an object
+                statesArray.push({
+                    id: trans.target,
+                    x: nodePositions.current[trans.target]?.x || width / 2,
+                    y: nodePositions.current[trans.target]?.y || height / 2
+                });
             }
+
         });
         const states_num = statesArray.length;
         
@@ -34,8 +44,8 @@ export default function StateDiagram({ states, activeStates }) {
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(statesArray)
-            .force("charge", d3.forceManyBody().strength(-500).distanceMax(dist))
-            .force("center", d3.forceCenter(width / 2, height / 2, 50))
+            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
+            .force("center", d3.forceCenter(width / 2, height / 2))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
             .on("tick", ticked);
         
@@ -89,15 +99,20 @@ export default function StateDiagram({ states, activeStates }) {
 
         function ticked() {
             link.attr("d", d => getCurvedPath(d.source, d.target));
-            
-            node.attr("cx", d => d.x)
-                .attr("cy", d => d.y);
+    
+            node.attr("cx", d => {
+                nodePositions.current[d.id] = { ...nodePositions.current[d.id], x: d.x }; // Save position
+                return d.x;
+            }).attr("cy", d => {
+                nodePositions.current[d.id] = { ...nodePositions.current[d.id], y: d.y };
+                return d.y;
+            });
     
             label.attr("x", d => d.x)
                 .attr("y", d => d.y)
                 .attr("text-anchor", "middle");
-
-            symbols.attr('x', d => (d.source.x + d.target.x) / 2)
+    
+            symbols.attr("x", d => (d.source.x + d.target.x) / 2)
                 .attr("y", d => (d.source.y + d.target.y) / 2)
                 .attr("text-anchor", "middle");
         }
