@@ -26,10 +26,12 @@ async def load(websocket: WebSocket, input_string, machine_definition):
     machine = Machine(machine_definition)
     machine.set_input(input_string)
 
+
     x = json.dumps({
         'memory': machine.memory,
         'states': machine.get_states(),
         'active-states': json.dumps(machine.worklist, cls=DequeEncoder),
+        'input-tape': machine.input_tape,
         'type': 'load'
     })
 
@@ -61,7 +63,6 @@ async def step(websocket: WebSocket, machine: Machine):
     states = [ config[0] for config in machine.worklist ]
 
     if 'accept' not in states and 'reject' not in states and len(list(states)) > 0:
-        await asyncio.sleep(1)
         machine.next()
         
         x = json.dumps({

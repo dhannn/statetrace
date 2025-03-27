@@ -1,0 +1,13 @@
+; Transforms 1^n to 1^(2n)
+
+.DATA
+TAPE T1
+TAPE T2
+
+.LOGIC
+q0] RIGHT(T1) (1/1,q1), (#/#,q3)
+q1] RIGHT(T2) (#/1,q2)
+q2] RIGHT(T2) (#/1,q0)
+q3] RIGHT(T2) (#/#,q4)
+q4] LEFT(T1) (1/1,q4), (#/#,q5)
+q5] LEFT(T2) (1/1,q5), (#/#,accept)

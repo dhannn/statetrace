@@ -44,7 +44,7 @@ export default function StateDiagram({ states, activeStates }) {
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(statesArray)
-            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
+            .force("charge", d3.forceManyBody().strength(-500).distanceMax(200))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
             .on("tick", ticked);
@@ -113,7 +113,7 @@ export default function StateDiagram({ states, activeStates }) {
                 .attr("text-anchor", "middle");
     
             symbols.attr("x", d => (d.source.x + d.target.x) / 2)
-                .attr("y", d => (d.source.y + d.target.y) / 2)
+                .attr("y", d => d.source == d.target? (d.source.y + d.target.y) / 2 - 60 : (d.source.y + d.target.y) / 2)
                 .attr("text-anchor", "middle");
         }
 

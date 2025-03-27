@@ -50,6 +50,53 @@ class MStack(Memory):
     
     def read(self):
         return self.content.pop()
+    
+class MTape:
+
+    ptr: int
+    head: int
+
+    def __init__(self, input_string=''):
+        self.set_input(input_string)
+        self.head = 0
+    
+    def set_input(self, input_string):
+        self.tape = { i: char for char, i in enumerate(input_string) }
+    
+    def left(self):
+        self.head -= 1
+
+    def right(self):
+        self.head += 1
+
+    def read(self):
+        return self.tape.get(self.head, None)
+    
+    def write(self, new_symbol):
+
+        old_symbol = self.tape[self.head]
+        self.tape[self.head] = new_symbol
+
+        return old_symbol, new_symbol
+    
+    def __iter__(self):
+        self.ptr = 0
+        return self
+
+    def __next__(self):
+        x = self.ptr
+        self.i += 1
+        
+        if len(self.tape.keys()) > x:
+            return None
+
+        return self.tape[x]
+
+def set_input(memory: dict, input_string: str):
+    for i, char in enumerate(input_string):
+        memory['tape'][i + 1] = char
+
+    return memory
 
 class Machine:
 
@@ -61,11 +108,15 @@ class Machine:
             'SCAN LEFT': self.scan_left,
             'SCAN RIGHT': self.scan,
             'WRITE': self.write,
-            'READ': self.read
+            'READ': self.read,
+            'LEFT': self.left,
+            'RIGHT': self.right
         }
 
         self.memory = {}
+        self.input_tape = None
         for name, mem_type in definition['memory'].items():
+            logger.debug(f'{mem_type}')
             if mem_type == 'STACK':
                 self.memory[name] = {
                     'type': mem_type,
@@ -76,13 +127,29 @@ class Machine:
                     'type': mem_type,
                     'content': []
                 }
+            elif mem_type == 'TAPE':
+                if self.input_tape == None:
+                    self.input_tape = name
+                self.memory[name] = {
+                    'type': mem_type,
+                    'content': {
+                        'head': 0,
+                        'tape': {}
+                    }
+                }
             
-        self.head = 0        
+        logger.debug(self.input_tape)
+        logger.debug(self.memory)
+        self.head_x = 0        
         self.worklist = deque()  # Worklist for nondeterministic execution paths
-        self.worklist.append((list(self.definition['states'].keys())[0], self.memory.copy(), self.head))
+        self.worklist.append((list(self.definition['states'].keys())[0], self.memory.copy(), self.head_x))
 
     def set_input(self, str_input):
-        self.input = '#' + str_input + '#'
+        if self.input_tape != None:
+            set_input(self.memory[self.input_tape]['content'], str_input)
+            logger.debug(f'self.input_tape: { self.input_tape }')
+        else:
+            self.input = '#' + str_input + '#'
     
     def get_states(self):
         initial_states = self.definition['states'].keys()
@@ -94,8 +161,9 @@ class Machine:
                     explored[state] = {}
                 explored[state][symbol] = next_states
         
-        return explored
+        logger.debug(f'Explored: {explored}')
 
+        return explored
 
     def next(self):
         if not self.worklist:
@@ -175,10 +243,54 @@ class Machine:
         return []
     
     def right(self, arg, transitions, head_pos, memory):
-        pass
+        head_pos += 1
+        possible_states = []
+        if arg in memory:
+            logger.debug(f'memory: {memory}')
+            for symbol, states in transitions.items():
+                for state in states:
+                    mem = deepcopy(memory)
+                    
+                    mem[arg]['content']['head'] += 1
+                    head = mem[arg]['content']['head']
+                    logger.debug(f'head: {head}')
+                    x = mem[arg]['content']['tape'].get(head, '#')
+                    logger.debug(f'curr char: {x}')
+
+                    read, write = symbol.split('/')
+                    mem[arg]['content']['tape'][head] = write
+                    logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                    if x == read:
+                        possible_states.append((state, mem, head_pos))
+                logger.debug(f'Symbol: {transitions[symbol]}')
+        
+        return possible_states
     
     def left(self, arg, transitions, head_pos, memory):
-        pass
+        head_pos -= 1
+        possible_states = []
+        if arg in memory:
+            logger.debug(f'memory: {memory}')
+            for symbol, states in transitions.items():
+                for state in states:
+                    mem = deepcopy(memory)
+                    
+                    mem[arg]['content']['head'] -= 1
+                    head = mem[arg]['content']['head']
+                    logger.debug(f'head: {head}')
+                    x = mem[arg]['content']['tape'].get(head, '#')
+                    logger.debug(f'curr char: {x}')
+
+                    read, write = symbol.split('/')
+                    mem[arg]['content']['tape'][head] = write
+                    logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                    if x == read:
+                        possible_states.append((state, mem, head_pos))
+                logger.debug(f'Symbol: {transitions[symbol]}')
+        
+        return possible_states
     
     def up(self, arg, transitions, head_pos, memory):
         pass
