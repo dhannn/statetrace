@@ -72,14 +72,14 @@ export default function MemoryPanel({ memory }) {
                         }}>
                             {executionPathSelect}
                         </select>
-                        <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
-                            {stacks}
+                        <div style={{display: 'flex', justifyContent: 'space-evenly', flexDirection: 'column'}}>
+                            {tapes}
                         </div>
                         <div style={{display: 'flex', justifyContent: 'space-evenly', flexDirection: 'column'}}>
                             {queues}
                         </div>
-                        <div style={{display: 'flex', justifyContent: 'space-evenly', flexDirection: 'column'}}>
-                            {tapes}
+                        <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                            {stacks}
                         </div>
                     </>
                 }

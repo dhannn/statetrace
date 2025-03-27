@@ -1,24 +1,24 @@
 .DATA
-STACK S1   // Main counting stack
-STACK S2   // Secondary verification stack
-STACK S3   // Pattern recognition stack
+STACK S1   ; Main counting stack
+STACK S2   ; Secondary verification stack
+STACK S3   ; Pattern recognition stack
 
 .LOGIC
-A] WRITE(S1) (#,B)      // Initialize S1 with bottom marker
+A] WRITE(S1) (#,B)      ; Initialize S1 with bottom marker
 B] SCAN (a,C), (b,E), (d,K)
-C] WRITE(S1) (X,D)      // For each 'a', write X on S1
-D] WRITE(S3) (a,B)      // Also track 'a' in S3
-E] READ(S1) (X,F)       // For 'b', read X from S1
-F] WRITE(S2) (X,G)      // Transfer X to S2
+C] WRITE(S1) (X,D)      ; For each 'a', write X on S1
+D] WRITE(S3) (a,B)      ; Also track 'a' in S3
+E] READ(S1) (X,F)       ; For 'b', read X from S1
+F] WRITE(S2) (X,G)      ; Transfer X to S2
 G] SCAN (b,E), (c,H), (d,L)
-H] READ(S2) (X,I)       // For each 'c', read X from S2
-I] SCAN (c,H), (#,J)    // Continue with 'c's or check completion
-J] READ(S1) (#,M)       // Verify S1 is empty except for bottom marker
-K] WRITE(S3) (d,N)      // Path for 'd's - populate S3
-L] READ(S3) (a,P)       // Path for alternate pattern - check S3
-M] READ(S2) (#,accept)  // Verify S2 is empty for a^nb^nc^n
-N] SCAN (d,K), (e,O)    // Continue with 'd's or switch to 'e's
-O] READ(S3) (d,Q)       // For each 'e', read a 'd' from S3
-P] WRITE(S2) (Y,G)      // Special processing for alternate pattern
-Q] SCAN (e,O), (#,R)    // Continue with 'e's or check completion
-R] READ(S3) (#,accept)  // Verify S3 is empty for d^ne^n
+H] READ(S2) (X,I)       ; For each 'c', read X from S2
+I] SCAN (c,H), (#,J)    ; Continue with 'c's or check completion
+J] READ(S1) (#,M)       ; Verify S1 is empty except for bottom marker
+K] WRITE(S3) (d,N)      ; Path for 'd's - populate S3
+L] READ(S3) (a,P)       ; Path for alternate pattern - check S3
+M] READ(S2) (#,accept)  ; Verify S2 is empty for a^nb^nc^n
+N] SCAN (d,K), (e,O)    ; Continue with 'd's or switch to 'e's
+O] READ(S3) (d,Q)       ; For each 'e', read a 'd' from S3
+P] WRITE(S2) (Y,G)      ; Special processing for alternate pattern
+Q] SCAN (e,O), (#,R)    ; Continue with 'e's or check completion
+R] READ(S3) (#,accept)  ; Verify S3 is empty for d^ne^n

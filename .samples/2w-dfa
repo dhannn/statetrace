@@ -5,4 +5,4 @@ B1] SCAN RIGHT (0,B1), (1,B1), (#,C1)
 C0] SCAN LEFT (0,accept), (1,reject)
 C1] SCAN LEFT (1,accept), (0,reject)
 
-// accepts w | w_1 = w_n 
+; accepts w | w_1 = w_n 

@@ -1,0 +1,16 @@
+; Accepts the strings (a^n)(b^n)(c^n)
+
+.DATA
+TAPE IN
+QUEUE Q1
+
+.LOGIC
+q0] RIGHT(IN) (a/a,q1), (b/b,q2)
+q1] WRITE(Q1) (A,q0)
+q2] READ(Q1) (A,q3)
+q3] WRITE(Q1) (B,q4)
+q4] RIGHT(IN) (b/b,q2), (c/c,q5)
+q5] WRITE(Q1) (#,q6)
+q6] READ(Q1) (B,q7)
+q7] RIGHT(IN) (c/c,q6), (#/#,q8)
+q8] READ(Q1) (#,accept)

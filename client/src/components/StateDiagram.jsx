@@ -39,12 +39,12 @@ export default function StateDiagram({ states, activeStates }) {
         });
         const states_num = statesArray.length;
         
-        const dist = 100 + (80 / (0.5 * states_num));
+        const dist = 100 + (50 / (0.25 * states_num));
 
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(statesArray)
-            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
+            .force("charge", d3.forceManyBody().strength(-200).distanceMax(dist))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("link", d3.forceLink(transitions).id(d => d.id).distance(dist))
             .on("tick", ticked);
