@@ -125,7 +125,7 @@ function App() {
           <StateDiagram states={states} activeStates={activeStates}/>
         </div>
         
-        <MemoryPanel memory={memoryObjects}/>
+        <MemoryPanel memory={memoryObjects} rejected={false}/>
       </>
       }
     </>

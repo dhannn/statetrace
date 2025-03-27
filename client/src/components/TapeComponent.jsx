@@ -58,8 +58,8 @@ export default function TapeComponent({ name, content }) {
 
     }, [content]);
 
-    return <div style={{overflow: 'scroll'}}>
-        <h2 style={{'textAlign': 'center'}}>Tape {name}</h2>
+    return <div style={{overflow: 'scroll', 'textAlign': 'center'}}>
+        <h2 >Tape {name}</h2>
         <svg ref={svgRef} width={width} height={50}/>
     </div>
 }

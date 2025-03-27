@@ -52,7 +52,6 @@ export default function MemoryPanel({ memory }) {
             }
         }
 
-        console.log('Stack info', stack_info);
         setStacks(stack_info.map(s => <StackComponent key={s.name} name={s.name} content={s.content}/>));
         setQueues(queue_info.map(s => <QueueComponent key={s.name} name={s.name} content={s.content}/>));
         setTapes(tape_info.map(s => <TapeComponent key={s.name} name={s.name} content={s.content} />));
@@ -65,9 +64,12 @@ export default function MemoryPanel({ memory }) {
             }}>
                 <h2>Memory</h2>
                 {
-                    memory.length === 0? 'You defined a simple finite state automaton.': 
+                    memory.length === 0 || Object.keys(memory[0]).length === 0? 'You defined a simple finite state automaton.': 
+
                     <>
-                        <select>
+                        <select onChange={(e) => {
+                            setCurrentExecutionPath(e.target.value);
+                        }}>
                             {executionPathSelect}
                         </select>
                         <div style={{display: 'flex', justifyContent: 'space-evenly'}}>

@@ -8,7 +8,7 @@ export default function StackComponent({ name, content }) {
     useEffect(() => {
         if (content !== undefined) {
             const width = 50, height = content.length * 50;
-            content.reverse();
+            const c = content.slice().reverse();
             
             const svg = d3.select(svgRef.current)
                 .attr("viewBox", [0, 0, width, height])
@@ -18,7 +18,7 @@ export default function StackComponent({ name, content }) {
 
             const squareSize = 50;
             const squares = svg.selectAll("g")
-                .data(content)
+                .data(c)
                 .enter()
                 .append("g")
                 .attr("transform", (d, i) => {

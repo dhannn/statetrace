@@ -64,6 +64,8 @@ async def step(websocket: WebSocket, machine: Machine):
 
     if 'accept' not in states and 'reject' not in states and len(list(states)) > 0:
         machine.next()
+
+        logger.debug(json.dumps(list(machine.worklist)))
         
         x = json.dumps({
             'active-states': json.dumps(list(machine.worklist)),

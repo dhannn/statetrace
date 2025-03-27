@@ -137,9 +137,7 @@ class Machine:
                         'tape': {}
                     }
                 }
-            
-        logger.debug(self.input_tape)
-        logger.debug(self.memory)
+
         self.head_x = 0        
         self.worklist = deque()  # Worklist for nondeterministic execution paths
         self.worklist.append((list(self.definition['states'].keys())[0], self.memory.copy(), self.head_x))
@@ -194,6 +192,7 @@ class Machine:
             new_states.extend(possible_next_states)
 
         self.worklist.extend(new_states)
+        logger.debug(f'self.worklist: {self.worklist}')
 
         if not self.worklist:  # If no more paths exist, the machine rejects the input
             logger.info("All paths led to dead ends. Input Rejected.")

@@ -39,14 +39,14 @@ export default function StateDiagram({ states, activeStates }) {
         });
         const states_num = statesArray.length;
         
-        const dist = 50 + (150 / (0.05 * states_num));
+        const dist = 100 + (80 / (0.5 * states_num));
 
         svg.selectAll("*").remove();
 
         const simulation = d3.forceSimulation(statesArray)
-            .force("charge", d3.forceManyBody().strength(-500).distanceMax(200))
+            .force("charge", d3.forceManyBody().strength(-500).distanceMax(100))
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("link", d3.forceLink(transitions).id(d => d.id).distance(100))
+            .force("link", d3.forceLink(transitions).id(d => d.id).distance(dist))
             .on("tick", ticked);
         
         const link = svg.append("g")
@@ -113,7 +113,7 @@ export default function StateDiagram({ states, activeStates }) {
                 .attr("text-anchor", "middle");
     
             symbols.attr("x", d => (d.source.x + d.target.x) / 2)
-                .attr("y", d => d.source == d.target? (d.source.y + d.target.y) / 2 - 60 : (d.source.y + d.target.y) / 2)
+                .attr("y", d => d.source == d.target? d.source.y - 60 : (d.source.y + d.target.y) / 2)
                 .attr("text-anchor", "middle");
         }
 
