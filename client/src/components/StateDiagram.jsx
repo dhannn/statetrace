@@ -2,19 +2,34 @@ import React, { useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
 const width = 500, height = 500;
-export default function StateDiagram({ states, activeStates }) {
+export default function StateDiagram({ states, activeStates, initialState }) {
     const svgRef = useRef();
     const nodePositions = useRef({}); // Store node positions between updates
 
     useEffect(() => {
         console.log(activeStates);
 
+        let indices = {}
+                    
         // Dynamically derive transitions from states object
         const transitions = Object.entries(states).flatMap(([state, edges]) =>
-            Object.entries(edges).flatMap(([symbol, targets]) =>
-                targets.map(target => ({ source: state, target, label: symbol }))
+            Object.entries(edges['next-states']).flatMap(([symbol, targets]) =>
+                targets.map((target) => {
+                    
+                    if (indices[state + target] !== undefined) {
+                        indices[state + target]++
+                    } else {
+                        indices[state + target] = 1;
+                    }
+                    const x = indices[state + target];
+                    
+                    return { source: state, target, label: symbol, i: x};
+            })
             )
         );
+        
+        console.log(indices);
+        console.log(transitions); 
 
         const svg = d3.select(svgRef.current)
             .attr("viewBox", [0, 0, width, height])
@@ -23,8 +38,26 @@ export default function StateDiagram({ states, activeStates }) {
         const statesArray = Object.keys(states).map(id => ({
             id,
             x: nodePositions.current[id]?.x || width / 2 + Math.random() * 100,
-            y: nodePositions.current[id]?.y || height / 2 + Math.random() * 100
+            y: nodePositions.current[id]?.y || height / 2 + Math.random() * 100,
+            command: states[id].command
         }));
+
+        const initialNode = statesArray.filter(x => x.id === initialState )[0];
+        
+        const startNode = { 
+            id: "start", 
+            x: nodePositions.current['start']?.x || width / 2 + Math.random() * 100,
+            y: nodePositions.current['start']?.y || height / 2 + Math.random() * 100,
+            command: 'initial state' 
+        };
+        statesArray.push(startNode);
+        const initialTransition = {
+            source: startNode,
+            target: initialNode.id
+        };
+
+        
+        transitions.push(initialTransition);
     
         transitions.forEach(trans => {
             
@@ -63,7 +96,7 @@ export default function StateDiagram({ states, activeStates }) {
             .data(statesArray)
             .join("circle")
             .attr("r", 25)
-            .attr("fill", d => (activeStates.includes(d.id) ? "#708B75" : "#30BCED")) // Highlight current state
+            .attr("fill", d => (d.id === 'start'? 'none': activeStates.includes(d.id) ? "#708B75" : "#30BCED")) // Highlight current state
             .call(drag(simulation));
 
         const label = svg.append("g")
@@ -71,18 +104,29 @@ export default function StateDiagram({ states, activeStates }) {
             .data(statesArray)
             .join("text")
             .text(d => d.id)
-            .attr("x", 6)
+            .attr("x", 0)
             .attr("y", 6)
             .style('font-family', 'Inter')
             .style('font-weight', 'bold');
+
+        const command = svg.append("g")
+            .selectAll("text")
+            .data(statesArray)
+            .join("text")
+            .text(d => d.command? d.command: 'halt')
+            .attr("x", 0)
+            .attr("y", 0)
+            .style('font-family', 'Fira Code')
+            .style('font-size', '0.6rem')
+            .style('font-weight', 'light');
 
         const symbols = svg.append("g")
             .selectAll("text")
             .data(transitions)
             .join("text")
             .text(d => d.label)
-            .attr("x", 6)
-            .attr("y", 6)
+            .attr("x", 0)
+            .attr("y", 0)
             .style('font-family', 'Fira Code');
 
         svg.append("defs").append("marker")
@@ -90,8 +134,8 @@ export default function StateDiagram({ states, activeStates }) {
             .attr("viewBox", "0 0 10 10")
             .attr("refX", 10)
             .attr("refY", 5)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
+            .attr("markerWidth", 5)
+            .attr("markerHeight", 5)
             .attr("orient", "auto-start-reverse")
             .append("path")
             .attr("d", "M 0 0 L 10 5 L 0 10 z")
@@ -109,11 +153,15 @@ export default function StateDiagram({ states, activeStates }) {
             });
     
             label.attr("x", d => d.x)
-                .attr("y", d => d.y)
+                .attr("y", d => d.y - 2.5)
+                .attr("text-anchor", "middle");
+    
+            command.attr("x", d => d.x)
+                .attr("y", d => d.y + 7.5)
                 .attr("text-anchor", "middle");
     
             symbols.attr("x", d => (d.source.x + d.target.x) / 2)
-                .attr("y", d => d.source == d.target? d.source.y - 60 : (d.source.y + d.target.y) / 2)
+                .attr("y", d => d.source == d.target? d.source.y - 60 * (0.8 + 0.2 * d.i) : ((d.source.y + d.target.y) / 2 * (0.8 + 0.2 * d.i)))
                 .attr("text-anchor", "middle");
         }
 
@@ -136,8 +184,9 @@ export default function StateDiagram({ states, activeStates }) {
         }
 
         function getCurvedPath(source, target) {
+
             if (source.id === target.id) {
-                const radius = 20;
+                const radius = 25;
                 return `M ${source.x} ${source.y - radius} 
                         C ${source.x - 40} ${source.y - 60}, 
                           ${source.x + 40} ${source.y - 60}, 
@@ -156,12 +205,13 @@ export default function StateDiagram({ states, activeStates }) {
                           ${target.x - offsetX},${target.y - offsetY}`;
             }
         }
-    }, [states, activeStates]);
-
+    }, [states, activeStates, initialState]);
+    
+    let activeSet = new Set(activeStates)
     return <div>
         <h2>State Diagram</h2>
         <h4 style={{marginBottom: '0.5vh'}}>Current State:</h4>
-        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0 ? 'Implicit Rejection' : activeStates}</pre>
+        <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0 ? 'Implicit Rejection' : Array.from(activeSet).join(', ')}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>
     </div>;
 }

@@ -1,0 +1,10 @@
+.DATA
+STACK S1
+
+.LOGIC
+A] WRITE(S1) (#,B)
+B] SCAN (0,C), (1,C), (#,D)
+C] WRITE(S1) (#,A)
+D] SCAN LEFT (0,E), (1,E), (#,A)
+E] WRITE(S1) (#,F)
+F] WRITE(S1) (#,D)

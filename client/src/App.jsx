@@ -17,6 +17,7 @@ function App() {
   const [ states, setStates ] = useState({});
   const [ inputString, setInputString ] = useState('');
   const [ head, setHead ] = useState([0]);
+  const [ initialState, setInitialState ] = useState();
   const [ activeStates, setActiveStates ] = useState([]);
   const [ memoryObjects, setMemoryObjects ] = useState([]);
   const [ inputTape, setInputTape ] = useState(false);
@@ -36,7 +37,9 @@ function App() {
           });
           setStates(data.states);
           setInputTape(data['input-tape']);
-          console.log(data);
+          
+          setInitialState(activeStates[0])
+          console.log('AFHA', initialState);
           
           setActiveStates(activeStates)
           const activeHeads = activeConfigs.map((x) => {
@@ -122,10 +125,10 @@ function App() {
       
         <div className='middle-panel'>
         { !inputTape && <StandardInput inputString={ inputString } tapeHead={head}/> }
-          <StateDiagram states={states} activeStates={activeStates}/>
+          <StateDiagram states={states} activeStates={activeStates} initialState={initialState}/>
         </div>
         
-        <MemoryPanel memory={memoryObjects} rejected={false}/>
+        <MemoryPanel memory={memoryObjects} />
       </>
       }
     </>

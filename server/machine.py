@@ -156,8 +156,11 @@ class Machine:
         for state in initial_states:
             for symbol, next_states in self.definition['states'][state]['transitions'].items():
                 if not explored.get(state):
-                    explored[state] = {}
-                explored[state][symbol] = next_states
+                    explored[state] = {
+                        'command': self.definition['states'][state]['command'],
+                        'next-states': {}
+                    }
+                explored[state]['next-states'][symbol] = next_states
         
         logger.debug(f'Explored: {explored}')
 
