@@ -1,0 +1,19 @@
+; Transforms 1^n to 1^(2n)
+
+.DATA
+TAPE stdin
+2D_TAPE tape
+STACK stack
+
+.LOGIC
+0] WRITE(stack) (#,A)
+A] RIGHT(stdin) (0/X,B), (1/Y,C), (#/#,D)
+B] WRITE(stack) (a,A)
+C] WRITE(stack) (b,A)
+D] READ(stack) (a,E), (b,F), (#,accept)
+E] RIGHT(tape) (#/1,E0), (1/1,E)
+E0] LEFT(tape) (1/1,E0), (#/#, D)
+F] DOWN(tape) (#/#,F0)
+F0] RIGHT(tape) (#/1,F1), (1/1,F0)
+F1] LEFT(tape) (1/1,F1), (#/#, F2)
+F2] UP(tape) (#/#,D)

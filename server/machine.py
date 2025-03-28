@@ -92,9 +92,14 @@ class MTape:
 
         return self.tape[x]
 
-def set_input(memory: dict, input_string: str):
-    for i, char in enumerate(input_string):
-        memory['tape'][i + 1] = char
+def set_input(type: str, memory: dict, input_string: str):
+
+    if type == 'TAPE':
+        for i, char in enumerate(input_string):
+            memory['tape'][i + 1] = char
+    elif type == '2D_TAPE':
+        for i, char in enumerate(input_string):
+            memory['tape'][str((0, i + 1))] = char
 
     return memory
 
@@ -110,7 +115,9 @@ class Machine:
             'WRITE': self.write,
             'READ': self.read,
             'LEFT': self.left,
-            'RIGHT': self.right
+            'RIGHT': self.right,
+            'UP': self.up,
+            'DOWN': self.down,
         }
 
         self.memory = {}
@@ -137,6 +144,16 @@ class Machine:
                         'tape': {}
                     }
                 }
+            elif mem_type == '2D_TAPE':
+                if self.input_tape == None:
+                    self.input_tape = name
+                self.memory[name] = {
+                    'type': mem_type,
+                    'content': {
+                        'head': (0, 0),
+                        'tape': {}
+                    }
+                }
 
         self.head_x = 0        
         self.worklist = deque()  # Worklist for nondeterministic execution paths
@@ -144,7 +161,10 @@ class Machine:
 
     def set_input(self, str_input):
         if self.input_tape != None:
-            set_input(self.memory[self.input_tape]['content'], str_input)
+            set_input(
+                self.memory[self.input_tape]['type'], 
+                self.memory[self.input_tape]['content'], 
+                str_input)
             logger.debug(f'self.input_tape: { self.input_tape }')
         else:
             self.input = '#' + str_input + '#'
@@ -252,19 +272,32 @@ class Machine:
             for symbol, states in transitions.items():
                 for state in states:
                     mem = deepcopy(memory)
-                    
-                    mem[arg]['content']['head'] += 1
-                    head = mem[arg]['content']['head']
-                    logger.debug(f'head: {head}')
-                    x = mem[arg]['content']['tape'].get(head, '#')
-                    logger.debug(f'curr char: {x}')
+                    if mem[arg]['type'] == 'TAPE':
+                        mem[arg]['content']['head'] += 1
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(head, '#')
+                        logger.debug(f'curr char: {x}')
 
-                    read, write = symbol.split('/')
-                    mem[arg]['content']['tape'][head] = write
-                    logger.debug(f'tape: {mem[arg]['content']['tape']}')
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][head] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
 
-                    if x == read:
-                        possible_states.append((state, mem, head_pos))
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
+                    elif mem[arg]['type'] == '2D_TAPE':
+                        mem[arg]['content']['head'] = mem[arg]['content']['head'][0 ], mem[arg]['content']['head'][1] + 1
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(str(head), '#')
+                        logger.debug(f'curr char: {x}')
+
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][str(head)] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
                 logger.debug(f'Symbol: {transitions[symbol]}')
         
         return possible_states
@@ -277,25 +310,80 @@ class Machine:
             for symbol, states in transitions.items():
                 for state in states:
                     mem = deepcopy(memory)
-                    
-                    mem[arg]['content']['head'] -= 1
-                    head = mem[arg]['content']['head']
-                    logger.debug(f'head: {head}')
-                    x = mem[arg]['content']['tape'].get(head, '#')
-                    logger.debug(f'curr char: {x}')
+                    if mem[arg]['type'] == 'TAPE':                   
+                        mem[arg]['content']['head'] -= 1
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(head, '#')
+                        logger.debug(f'curr char: {x}')
 
-                    read, write = symbol.split('/')
-                    mem[arg]['content']['tape'][head] = write
-                    logger.debug(f'tape: {mem[arg]['content']['tape']}')
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][head] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
 
-                    if x == read:
-                        possible_states.append((state, mem, head_pos))
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
+                    elif mem[arg]['type'] == '2D_TAPE':
+                        mem[arg]['content']['head'] = mem[arg]['content']['head'][0], mem[arg]['content']['head'][1] - 1
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(str(head), '#')
+                        logger.debug(f'curr char: {x}')
+
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][str(head)] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
                 logger.debug(f'Symbol: {transitions[symbol]}')
         
         return possible_states
     
     def up(self, arg, transitions, head_pos, memory):
-        pass
+        possible_states = []
+        if arg in memory:
+            logger.debug(f'memory: {memory}')
+            for symbol, states in transitions.items():
+                for state in states:
+                    mem = deepcopy(memory)
+                    if mem[arg]['type'] == '2D_TAPE':
+                        mem[arg]['content']['head'] = mem[arg]['content']['head'][0] - 1, mem[arg]['content']['head'][1]
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(str(head), '#')
+                        logger.debug(f'curr char: {x}')
+
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][str(head)] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
+                logger.debug(f'Symbol: {transitions[symbol]}')
+        
+        return possible_states
     
     def down(self, arg, transitions, head_pos, memory):
-        pass
+        possible_states = []
+        if arg in memory:
+            logger.debug(f'memory: {memory}')
+            for symbol, states in transitions.items():
+                for state in states:
+                    mem = deepcopy(memory)
+                    if mem[arg]['type'] == '2D_TAPE':
+                        mem[arg]['content']['head'] = mem[arg]['content']['head'][0] + 1, mem[arg]['content']['head'][1]
+                        head = mem[arg]['content']['head']
+                        logger.debug(f'head: {head}')
+                        x = mem[arg]['content']['tape'].get(str(head), '#')
+                        logger.debug(f'curr char: {x}')
+
+                        read, write = symbol.split('/')
+                        mem[arg]['content']['tape'][str(head)] = write
+                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
+
+                        if x == read:
+                            possible_states.append((state, mem, head_pos))
+                logger.debug(f'Symbol: {transitions[symbol]}')
+        
+        return possible_states

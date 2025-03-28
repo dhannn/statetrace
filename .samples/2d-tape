@@ -1,0 +1,8 @@
+.DATA
+2D_TAPE T1
+
+.LOGIC
+q0] RIGHT(T1) (#/X,q1)
+q1] DOWN(T1) (#/X,q2)
+q2] LEFT(T1) (#/X,q3)
+q3] UP(T1) (#/X,accept)
