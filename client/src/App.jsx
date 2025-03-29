@@ -7,6 +7,7 @@ import StandardInput from './components/StandardInput';
 import MemoryPanel from './components/MemoryPanel';
 import ErrorModal from './components/ErrorModal';
 import Modal from './components/Modal';
+import StandardOutput from './components/StandardOutput';
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
   const [ activeStates, setActiveStates ] = useState([]);
   const [ memoryObjects, setMemoryObjects ] = useState([]);
   const [ inputTape, setInputTape ] = useState(false);
+  const [ outputString, setOutputString ] = useState(false);
   const [ error, setError ] = useState('');
   const [ isInitialized, setIsInitialized ] = useState(false);
 
@@ -39,7 +41,6 @@ function App() {
           setInputTape(data['input-tape']);
           
           setInitialState(activeStates[0])
-          console.log('AFHA', initialState);
           
           setActiveStates(activeStates)
           const activeHeads = activeConfigs.map((x) => {
@@ -47,6 +48,7 @@ function App() {
           });
           setHead(activeHeads);
           const activeMemoryObjects = activeConfigs.map((x) => {
+            setOutputString(undefined);
             return x[1];
           });
           setMemoryObjects(activeMemoryObjects);
@@ -68,6 +70,9 @@ function App() {
           });
           setActiveStates(activeStates);
           const activeMemoryObjects = activeConfigs.map((x) => {
+            if (x[1]['stdout']) {
+              setOutputString(x[1]['stdout']);
+            }
             return x[1];
           });
           const activeHeads = activeConfigs.map((x) => {
@@ -75,7 +80,7 @@ function App() {
           });
           setHead(activeHeads);
           setMemoryObjects(activeMemoryObjects);
-          console.log('Active Memory Objects:', activeMemoryObjects);
+          
           
           break;
         }
@@ -123,12 +128,13 @@ function App() {
         <p>Simply define the machine and test it on an input string.</p>
         </div>: <>
       
-        <div className='middle-panel'>
+        <div className='middle-panel' style={{overflow: 'scroll'}}>
         { !inputTape && <StandardInput inputString={ inputString } tapeHead={head}/> }
+        { outputString && <StandardOutput outputString= {outputString}/>}
           <StateDiagram states={states} activeStates={activeStates} initialState={initialState}/>
         </div>
         
-        <MemoryPanel memory={memoryObjects} />
+        { isInitialized && <MemoryPanel memory={memoryObjects} />}
       </>
       }
     </>

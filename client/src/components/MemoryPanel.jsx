@@ -16,7 +16,7 @@ export default function MemoryPanel({ memory }) {
     useEffect(() => {
 
         const executionPaths = memory.map((mem, i) => {
-            return <option key={i} value={i}>Execution Path: {i}</option>;
+            return <option key={i} value={i}>Execution Path: {i + 1}</option>;
         });
         setExecutionPathSelect(executionPaths);
         
@@ -72,18 +72,24 @@ export default function MemoryPanel({ memory }) {
         <>
             <div className='memory-panel' style={{
                 width: '30vw',
-                overflow: 'scroll'
+                overflow: 'scroll',
+                paddingRight: '2vw'
             }}>
                 <h2>Memory</h2>
                 {
                     memory.length === 0 || Object.keys(memory[0]).length === 0? 'You defined a simple finite state automaton.': 
 
                     <>
-                        <select onChange={(e) => {
+                        {executionPathSelect.length !== 1 && 
+                        <select style={{
+                            padding: '1vh 1vw',
+                            borderRadius: '5px'
+                        }} onChange={(e) => {
                             setCurrentExecutionPath(e.target.value);
                         }}>
                             {executionPathSelect}
                         </select>
+                        }
                         <div style={{display: 'flex', justifyContent: 'space-evenly', flexDirection: 'column'}}>
                             {twoDimTapes}
                         </div>

@@ -5,93 +5,6 @@ import random
 
 from loguru import logger
 
-class Memory:
-    def write(symbol: str):
-        pass
-
-    def read() -> str:
-        pass
-    
-    def __iter__(self):
-        self.i = 0
-        return self
-
-    def __next__(self):
-        x = self.i
-        self.i += 1
-        
-        if x >= len(self.content):
-            return None
-
-        return self.content[x]
-
-class MQueue(Memory):
-
-    content: list
-
-    def __init__(self):
-        self.content = []
-
-    def write(self, symbol):
-        self.content.insert(0, symbol)
-    
-    def read(self):
-        return self.content.pop()
-
-class MStack(Memory):
-
-    content: list
-
-    def __init__(self):
-        self.content = []
-
-    def write(self, symbol):
-        self.content.append(symbol)
-    
-    def read(self):
-        return self.content.pop()
-    
-class MTape:
-
-    ptr: int
-    head: int
-
-    def __init__(self, input_string=''):
-        self.set_input(input_string)
-        self.head = 0
-    
-    def set_input(self, input_string):
-        self.tape = { i: char for char, i in enumerate(input_string) }
-    
-    def left(self):
-        self.head -= 1
-
-    def right(self):
-        self.head += 1
-
-    def read(self):
-        return self.tape.get(self.head, None)
-    
-    def write(self, new_symbol):
-
-        old_symbol = self.tape[self.head]
-        self.tape[self.head] = new_symbol
-
-        return old_symbol, new_symbol
-    
-    def __iter__(self):
-        self.ptr = 0
-        return self
-
-    def __next__(self):
-        x = self.ptr
-        self.i += 1
-        
-        if len(self.tape.keys()) > x:
-            return None
-
-        return self.tape[x]
-
 def set_input(type: str, memory: dict, input_string: str):
 
     if type == 'TAPE':
@@ -118,6 +31,7 @@ class Machine:
             'RIGHT': self.right,
             'UP': self.up,
             'DOWN': self.down,
+            'PRINT': self.print
         }
 
         self.memory = {}
@@ -225,6 +139,9 @@ class Machine:
 
     def scan(self, arg, transitions, head_pos, memory):
         """Read input at the current tape position and determine the next state(s)."""
+        if self.input_tape != None:
+            return self.right(self.input_tape, transitions, head_pos, memory)
+
         symbol = self.input[head_pos + 1]
 
         x = [(next_state, memory.copy(), head_pos + 1) 
@@ -233,6 +150,9 @@ class Machine:
 
     def scan_left(self, arg, transitions, head_pos, memory):
         """Move the tape head left."""
+        if self.input_tape != None:
+            return self.left(self.input_tape, transitions, head_pos, memory)
+        
         symbol = self.input[head_pos - 1]
         return [(next_state, memory.copy(), head_pos - 1) 
                 for read_symbol, states in transitions.items() if symbol == read_symbol for next_state in states]
@@ -278,10 +198,19 @@ class Machine:
                         logger.debug(f'head: {head}')
                         x = mem[arg]['content']['tape'].get(head, '#')
                         logger.debug(f'curr char: {x}')
+                        logger.debug(f'symbol: {symbol}')
 
-                        read, write = symbol.split('/')
+                        read = symbol.split('/')
+                        if len(read) == 1:
+                            write = read[0]
+                            read = read[0]
+                        else:
+                            write = read[1]
+                            read = read[0]
+
+                        logger.debug(f': {x}, {read}')
                         mem[arg]['content']['tape'][head] = write
-                        logger.debug(f'tape: {mem[arg]['content']['tape']}')
+                        logger.debug(f'tape: {mem[arg]}')
 
                         if x == read:
                             possible_states.append((state, mem, head_pos))
@@ -387,3 +316,21 @@ class Machine:
                 logger.debug(f'Symbol: {transitions[symbol]}')
         
         return possible_states
+
+    def print(self, arg, transitions, head_pos, memory):
+
+        x = []
+
+        for write_symbol, states in transitions.items():
+            mem = memory.copy()
+            for next_state in states:
+                logger.debug(f'{mem}')
+                if not 'stdout' in mem:
+                    mem['stdout'] = ''
+                
+                logger.debug(f'{mem}')
+                mem['stdout'] += write_symbol
+
+                x.append((next_state, mem, head_pos))
+
+        return x

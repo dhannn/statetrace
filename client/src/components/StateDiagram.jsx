@@ -14,14 +14,13 @@ export default function StateDiagram({ states, activeStates, initialState }) {
         // Dynamically derive transitions from states object
         const transitions = Object.entries(states).flatMap(([state, edges]) =>
             Object.entries(edges['next-states']).flatMap(([symbol, targets]) =>
-                targets.map((target) => {
-                    
-                    if (indices[state + target] !== undefined) {
-                        indices[state + target]++
+                targets.map((target) => {                    
+                    if (indices[[state, target].sort().join('')] !== undefined) {
+                        indices[[state, target].sort().join('')]++
                     } else {
-                        indices[state + target] = 1;
+                        indices[[state, target].sort().join('')] = 1;
                     }
-                    const x = indices[state + target];
+                    const x = indices[[state, target].sort().join('')];
                     
                     return { source: state, target, label: symbol, i: x};
             })

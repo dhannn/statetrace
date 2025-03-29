@@ -6,9 +6,35 @@ export default function InputPanel(props) {
     const [ inputString, setInputString ] = useState('');
     const [ machineDefinition, setMachineDefinition ] = useState('');
 
-
     return <div className='input-panel'>
-        <h1>StateTrace</h1>
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            gap: '2px'
+        }}>
+            <img src="logo.svg" style={{
+                width: '30%',
+            }}/>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                textAlign: 'left',
+                gap: '0px',
+                justifyContent: 'center'
+            }}>
+                <h1 style={{
+                    fontSize: '2.6rem',
+                    padding: '0px',
+                    margin: '0px'
+                }}>StateTrace</h1>
+                <p style={{
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    padding: '0px',
+                    margin: '0px'
+                }}>An Abstract Machine Simulator</p>
+            </div>
+        </div>
         <h2>Input String</h2>
         <input onInput={(e) => {
             setInputString(e.target.value);

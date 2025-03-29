@@ -1,0 +1,4 @@
+.LOGIC
+A] SCAN (0,A), (1,A), (0,B), (1,C)
+B] SCAN (0,accept)
+C] SCAN (1,accept)
