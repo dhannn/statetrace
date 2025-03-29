@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import MachineEditor from "../utils/SyntaxHighlighting";
 
 export default function InputPanel(props) {
     const { onLoad, onRun, onStep } = props;
@@ -41,8 +42,8 @@ export default function InputPanel(props) {
             
         }}/>
         <h2>Machine Definition</h2>
-        <textarea onInput={(e) => {
-            setMachineDefinition(e.target.value);
+        <MachineEditor value={ machineDefinition } onChange={(m_def) => {
+            setMachineDefinition(m_def);
         }}/>
 
         <div className='control-panel'>

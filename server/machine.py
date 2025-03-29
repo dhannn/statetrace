@@ -179,7 +179,7 @@ class Machine:
 
     def read(self, arg, transitions, head_pos, memory):
         """Read from stack/queue memory and determine next state(s)."""
-        if arg in memory and memory[arg]:  # Ensure memory is not empty
+        if arg in memory and memory[arg] and len(memory[arg]['content']) > 0:  # Ensure memory is not empty
             read_value = memory[arg]['content'].pop()
             return [(state, deepcopy(memory), head_pos) for state in transitions.get(read_value, [])]
         return []

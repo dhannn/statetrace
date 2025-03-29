@@ -3,3 +3,4 @@ q0] SCAN (0,q2), (1,q1), (#,accept)
 q1] SCAN (0,q3), (1,q0), (#,reject)
 q2] SCAN (0,q0), (1,q3), (#,reject)
 q3] SCAN (0,q1), (1,q2), (#,reject)
+I actually had a server-side tokenizer for my structured input!

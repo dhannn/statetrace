@@ -68,3 +68,41 @@
 .control-panel button {
   margin-right: 1vw;
 }
+
+.editor-container {
+  border: 1px solid #444;
+  height: 100%;
+  background-color: white; 
+  color: #f8f8f2;
+  font-family: "Fira Code";
+
+  /* padding-left: 0px; */
+  padding: 10px 10px 10px 10px;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: #484349;
+
+  height: 50vh;
+  line-height: 1.5rem;
+  font-size: 0.8rem;
+  text-wrap: wrap;
+  overflow-x: hidden !important;
+  white-space: pre-wrap !important; /* Allows wrapping */
+  word-break: break-word !important; /* Ensures long words break */
+}
+.cm-editor {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow-x: hidden !important;
+  white-space: pre-wrap !important; /* Allows wrapping */
+  word-break: break-word !important; /* Ensures long words break */
+}
+
+.editor-container:focus,
+.editor-container:focus-visible,
+.cm-editor:focus,
+.cm-editor:focus-visible {
+    outline: none !important; /* Removes the dotted border */
+}
+
