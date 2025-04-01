@@ -80,7 +80,7 @@ export default function MemoryPanel({ memory }) {
                     memory.length === 0 || Object.keys(memory[0]).length === 0? 'You defined a simple finite state automaton.': 
 
                     <>
-                        {executionPathSelect.length !== 1 && 
+                        { 
                         <select style={{
                             padding: '1vh 1vw',
                             borderRadius: '5px'

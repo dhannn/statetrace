@@ -1,0 +1,81 @@
+.DATA
+QUEUE Q
+
+.LOGIC
+A] SCAN         (0,B), (1,C)
+B] WRITE(Q)     (1,A)
+C] WRITE(Q)     (X,D)
+D] WRITE(Q)     (1,E)
+E] SCAN         (1,D), (#,F)
+F] WRITE(Q)     (#,G)
+G] WRITE(Q)     (HEAD,accept)
+
+.DATA
+QUEUE Q
+
+.LOGIC
+A] SCAN         (0,B), (1,C)
+B] WRITE(Q)     (1,A)
+C] WRITE(Q)     (X,D)
+D] WRITE(Q)     (1,E)
+E] SCAN         (1,D), (#,F)
+F] WRITE(Q)     (#,G)
+G] READ	(Q)		(1,H)
+H] WRITE(Q)		(A,I)
+I] READ	(Q)		(1,J), (X,K),
+				(#,L)
+J] WRITE(Q)		(1,I)
+K] WRITE(Q)		(X,I)
+L] WRITE(Q)		(#,O)
+O] WRITE(Q)		(X,P)
+P] READ(Q)		(A,Q)
+Q] WRITE(Q)		(A,q0)
+q0] WRITE(Q)	(1,q1)
+q1] READ(Q)		(1,q2), (X,q3),
+				(#,q4)
+q2] WRITE(Q)	(1,q1)
+q3] WRITE(Q)	(X,q1)
+q4] WRITE(Q)	(#,q5)
+q5] WRITE(Q)	(1,q6)
+
+
+
+
+
+
+
+.DATA
+QUEUE Q
+
+.LOGIC
+; Populate "tape"
+q00] WRITE(Q)	($,q0) ; Everything from the left of $ is the start of the tape (tape is in reverse)
+q0] SCAN		(0,q1), (1,q2)
+q1] WRITE(Q)	(1,q0)
+q2] WRITE(Q)	(X,q3)
+q3] WRITE(Q)	(1,q4)
+q4] SCAN		(1,q3), (#,q5)
+
+q5] READ(Q)		($,q6_0)
+q6_0] WRITE(Q)	(X,q6)
+q6] WRITE(Q)	($,q7)
+
+; -- Copy the first number
+; Mark digit in first number
+q7] READ(Q)		(1,q8), (A,q7a), 
+				(X,q14)
+q7a] WRITE(Q)	(A,q7)
+q8] WRITE(Q)	(A,q9)
+
+q9] READ(Q)		(1,q10), (X,q11), ($,q12)
+q10] WRITE(Q)	(1,q9)
+q11] WRITE(Q)	(X,q9)
+
+q12] WRITE(Q)	(1,q13)
+q13] WRITE(Q)	($,q7)
+
+q14] WRITE(Q)	(X,q15)
+
+; -- Copy the second number
+q15] READ(Q)	(1,q16)
+q16] WRITE(Q)	(A,q17)

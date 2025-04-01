@@ -221,7 +221,14 @@ class Machine:
                         x = mem[arg]['content']['tape'].get(str(head), '#')
                         logger.debug(f'curr char: {x}')
 
-                        read, write = symbol.split('/')
+                        read = symbol.split('/')
+                        if len(read) == 1:
+                            write = read[0]
+                            read = read[0]
+                        else:
+                            write = read[1]
+                            read = read[0]
+
                         mem[arg]['content']['tape'][str(head)] = write
                         logger.debug(f'tape: {mem[arg]['content']['tape']}')
 
@@ -246,7 +253,14 @@ class Machine:
                         x = mem[arg]['content']['tape'].get(head, '#')
                         logger.debug(f'curr char: {x}')
 
-                        read, write = symbol.split('/')
+                        read = symbol.split('/')
+                        if len(read) == 1:
+                            write = read[0]
+                            read = read[0]
+                        else:
+                            write = read[1]
+                            read = read[0]
+
                         mem[arg]['content']['tape'][head] = write
                         logger.debug(f'tape: {mem[arg]['content']['tape']}')
 
@@ -259,7 +273,15 @@ class Machine:
                         x = mem[arg]['content']['tape'].get(str(head), '#')
                         logger.debug(f'curr char: {x}')
 
-                        read, write = symbol.split('/')
+
+                        read = symbol.split('/')
+                        if len(read) == 1:
+                            write = read[0]
+                            read = read[0]
+                        else:
+                            write = read[1]
+                            read = read[0]
+                        
                         mem[arg]['content']['tape'][str(head)] = write
                         logger.debug(f'tape: {mem[arg]['content']['tape']}')
 

@@ -1,33 +1,42 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from 'd3';
+import { downloadSVG } from "../utils/StateDiagramUtils";
 
 const width = 500, height = 500;
 export default function StateDiagram({ states, activeStates, initialState }) {
     const svgRef = useRef();
     const nodePositions = useRef({}); // Store node positions between updates
-
+    
     useEffect(() => {
         console.log(activeStates);
-
-        let indices = {}
+        
+        const edgeIndices = {}; // Store edge indices for label positioning
                     
         // Dynamically derive transitions from states object
         const transitions = Object.entries(states).flatMap(([state, edges]) =>
             Object.entries(edges['next-states']).flatMap(([symbol, targets]) =>
-                targets.map((target) => {                    
-                    if (indices[[state, target].sort().join('')] !== undefined) {
-                        indices[[state, target].sort().join('')]++
-                    } else {
-                        indices[[state, target].sort().join('')] = 1;
-                    }
-                    const x = indices[[state, target].sort().join('')];
+                targets.map((target) => {                           
+                    // Create a consistent key for each source-target pair
+                    const edgeKey = `${state}-${target}`; // Use directional key instead
                     
-                    return { source: state, target, label: symbol, i: x};
-            })
+                    // Initialize if this is the first transition for this pair
+                    if (!edgeIndices[edgeKey]) {
+                        edgeIndices[edgeKey] = 0;
+                    }
+                    
+                    // Increment and use as index
+                    edgeIndices[edgeKey]++;
+                    
+                    return { 
+                        source: state, 
+                        target, 
+                        label: symbol, 
+                        i: edgeIndices[edgeKey]
+                    };
+                })
             )
         );
-        
-        console.log(indices);
+    
         console.log(transitions); 
 
         const svg = d3.select(svgRef.current)
@@ -41,7 +50,7 @@ export default function StateDiagram({ states, activeStates, initialState }) {
             command: states[id].command
         }));
 
-        const initialNode = statesArray.filter(x => x.id === initialState )[0];
+        const initialNode = statesArray.filter(x => x.id === initialState)[0];
         
         const startNode = { 
             id: "start", 
@@ -52,14 +61,15 @@ export default function StateDiagram({ states, activeStates, initialState }) {
         statesArray.push(startNode);
         const initialTransition = {
             source: startNode,
-            target: initialNode.id
+            target: initialNode.id,
+            label: "start",
+            i: 1
         };
 
-        
         transitions.push(initialTransition);
     
+        // Make sure all targets in transitions exist in statesArray
         transitions.forEach(trans => {
-            
             if (!statesArray.some(s => s.id === trans.target)) {
                 statesArray.push({
                     id: trans.target,
@@ -67,8 +77,8 @@ export default function StateDiagram({ states, activeStates, initialState }) {
                     y: nodePositions.current[trans.target]?.y || height / 2
                 });
             }
-
         });
+        
         const states_num = statesArray.length;
         
         const dist = 100 + (50 / (0.25 * states_num));
@@ -126,7 +136,9 @@ export default function StateDiagram({ states, activeStates, initialState }) {
             .text(d => d.label)
             .attr("x", 0)
             .attr("y", 0)
-            .style('font-family', 'Fira Code');
+            .style('font-family', 'Fira Code')
+            .style('font-size', '0.6rem')
+            .attr("text-anchor", "middle"); // Add text-anchor to center text
 
         svg.append("defs").append("marker")
             .attr("id", "arrow")
@@ -141,7 +153,7 @@ export default function StateDiagram({ states, activeStates, initialState }) {
             .attr("fill", "#999");
 
         function ticked() {
-            link.attr("d", d => getCurvedPath(d.source, d.target));
+            link.attr("d", d => getCurvedPath(d));
     
             node.attr("cx", d => {
                 nodePositions.current[d.id] = { ...nodePositions.current[d.id], x: d.x }; // Save position
@@ -159,9 +171,54 @@ export default function StateDiagram({ states, activeStates, initialState }) {
                 .attr("y", d => d.y + 7.5)
                 .attr("text-anchor", "middle");
     
-            symbols.attr("x", d => (d.source.x + d.target.x) / 2)
-                .attr("y", d => d.source == d.target? d.source.y - 60 * (0.8 + 0.2 * d.i) : ((d.source.y + d.target.y) / 2 * (0.8 + 0.2 * d.i)))
-                .attr("text-anchor", "middle");
+            // Update label positions
+            symbols.each(function(d) {
+                const sourceNode = statesArray.find(node => node.id === d.source) || 
+                                 (typeof d.source === 'object' ? d.source : null);
+                const targetNode = statesArray.find(node => node.id === d.target) || 
+                                 (typeof d.target === 'object' ? d.target : null);
+                
+                if (!sourceNode || !targetNode) {
+                    return; // Skip if nodes aren't found
+                }
+                
+                let x, y;
+                
+                // Self-loop
+                if (sourceNode.id === targetNode.id || sourceNode === targetNode) {
+                    x = sourceNode.x;
+                    y = sourceNode.y - 60 - (d.i * 15); // Stacked vertically above node
+                } else {
+                    // Get midpoint
+                    const midX = (sourceNode.x + targetNode.x) / 2;
+                    const midY = (sourceNode.y + targetNode.y) / 2;
+                    
+                    // Get direction vector
+                    const dx = targetNode.x - sourceNode.x;
+                    const dy = targetNode.y - sourceNode.y;
+                    
+                    // Skip calculation if dx and dy are both 0
+                    if (dx === 0 && dy === 0) {
+                        x = midX;
+                        y = midY;
+                    } else {
+                        // Get perpendicular vector (normalized)
+                        const len = Math.sqrt(dx * dx + dy * dy) || 1; // Avoid division by zero
+                        const perpX = -dy / len;
+                        const perpY = dx / len;
+                        
+                        // Offset perpendicular to the line
+                        const offset = (d.i - 0.1) * 15; // Space labels out
+                        x = midX + perpX * offset;
+                        y = midY + perpY * offset;
+                    }
+                }
+                
+                // Apply positions to the element
+                d3.select(this)
+                    .attr("x", x)
+                    .attr("y", y);
+            });
         }
 
         function drag(simulation) {
@@ -182,23 +239,36 @@ export default function StateDiagram({ states, activeStates, initialState }) {
                 });
         }
 
-        function getCurvedPath(source, target) {
-
-            if (source.id === target.id) {
+        function getCurvedPath(d) {
+            const source = typeof d.source === 'string' 
+                ? statesArray.find(n => n.id === d.source) 
+                : d.source;
+            
+            const target = typeof d.target === 'string' 
+                ? statesArray.find(n => n.id === d.target) 
+                : d.target;
+            
+            if (!source || !target) {
+                return ""; // Return empty path if source or target is undefined
+            }
+            
+            if (source.id === target.id || source === target) {
                 const radius = 25;
+                const loopSize = 40; // Size of the loop
+                
                 return `M ${source.x} ${source.y - radius} 
-                        C ${source.x - 40} ${source.y - 60}, 
-                          ${source.x + 40} ${source.y - 60}, 
+                        C ${source.x - loopSize} ${source.y - loopSize - 20}, 
+                          ${source.x + loopSize} ${source.y - loopSize - 20}, 
                           ${source.x} ${source.y - radius}`;
             } else {
                 const dx = target.x - source.x;
                 const dy = target.y - source.y;
                 const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
-
+        
                 const angle = Math.atan2(dy, dx);
                 const offsetX = Math.cos(angle) * 25;
                 const offsetY = Math.sin(angle) * 25;
-
+        
                 return `M ${source.x + offsetX},${source.y + offsetY} 
                         A ${dr},${dr} 0 0,1 
                           ${target.x - offsetX},${target.y - offsetY}`;
@@ -209,6 +279,7 @@ export default function StateDiagram({ states, activeStates, initialState }) {
     let activeSet = new Set(activeStates)
     return <div>
         <h2>State Diagram</h2>
+        <button onClick={() => downloadSVG(svgRef.current)}>Download snapshot</button>
         <h4 style={{marginBottom: '0.5vh'}}>Current State:</h4>
         <pre style={{marginTop: '0vh', fontSize: '0.9rem'}}>{activeStates.length === 0 ? 'Implicit Rejection' : Array.from(activeSet).join(', ')}</pre>
         <svg style={{border: '0.5px solid black'}} ref={svgRef} width={width} height={height}/>

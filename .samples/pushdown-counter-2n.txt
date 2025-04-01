@@ -1,0 +1,38 @@
+.DATA
+STACK S1
+STACK S2
+
+.LOGIC
+A] WRITE(S1)    (#,B)
+B] WRITE(S2)    (#,C)
+
+; Count the first 0^n
+C] SCAN RIGHT   (0,D), (1,E)
+D] WRITE(S1)    (X,C)
+
+; Check if (0^n)(1^n)
+E] READ(S1)     (X,F)
+F] WRITE(S2)    (X,G)
+G] SCAN RIGHT   (1,E), (0,H)
+
+; Reset
+H] SCAN LEFT    (1,I)
+I] READ(S1)     (#,J)
+J] WRITE(S1)    (#,K)
+
+; Check if the second |0| = 2n
+K] SCAN RIGHT   (0,L), (1,O)
+L] SCAN RIGHT   (0,M)
+M] READ(S2)     (X,N)
+N] WRITE(S1)    (X,K)
+
+; Reset
+O] SCAN LEFT    (0,P)
+P] READ(S2)     (#,Q)
+
+; Check if the second |1| = 2n
+Q] SCAN RIGHT   (1,R), (#,T)
+R] SCAN RIGHT   (1,S)
+S] READ(S1)     (X,Q)
+T] READ(S1)    (#,accept)
+

@@ -1,0 +1,80 @@
+.DATA
+TAPE IN
+TAPE OUT
+TAPE A
+TAPE B
+
+.LOGIC
+; Base cases for Fibonacci
+S1] RIGHT(IN)       (1/1,S2)
+S2] RIGHT(A)        (#/1,S3)      ; F(1) = 1, store in tape A
+S3] RIGHT(OUT)      (#/1,S4)      ; Output F(1) = 1
+
+S4] RIGHT(IN)       (1/1,S5), (#,accept)      ; Check if N ≥ 2
+S5] RIGHT(B)        (#/1,S6)      ; F(2) = 1, store in tape B
+S6] LEFT(A)         (#/#,CHK_A)     ; Prepare for next iteration
+
+; Main Fibonacci computation loop (when N ≥ 3)
+CHK_A] RIGHT(IN)    (1/1,A1), (#/#,accept)  ; Check if we need to compute more
+
+; Copy A to output (A represents F(n-1))
+A1] RIGHT(A)        (1/1,A2), (#/1,B1)
+A2] RIGHT(OUT)      (#/1,A1)
+
+; Copy B to A (preparing for next iteration)
+B1] LEFT(B)         (1/1,B2), (#/#,CHK_B)
+B2] RIGHT(A)        (#/1,B1)
+
+; Check if we need another iteration
+CHK_B] RIGHT(IN)	(1/1,C1), (#/#,accept)
+
+; Copy B to output (B represents F(n-2))
+C1] RIGHT(B)		(1/1,C2), (#/1,D1)
+C2] RIGHT(OUT)	    (#/1,C1)
+
+; Copy A to B (preparing for next iteration)
+D1] LEFT(A)         (1/1,D2), (#/#,CHK_A)
+D2] RIGHT(B)        (#/1,D1)
+
+
+
+
+
+
+.DATA
+TAPE IN
+TAPE OUT
+TAPE A
+TAPE B
+
+.LOGIC
+; Base cases for Fibonacci
+S1] RIGHT(IN)       (1,S2)
+S2] RIGHT(A)        (#/1,S3)      ; F(1) = 1, store in tape A
+S3] RIGHT(OUT)      (#/1,S4)      ; Output F(1) = 1
+
+S4] RIGHT(IN)       (1,S5), (#,accept) ; Check if N ≥ 2
+S5] RIGHT(B)        (#/1,S6)      ; F(2) = 1, store in tape B
+S6] LEFT(A)         (#,CHK_A)     ; Prepare for next iteration
+
+; Main Fibonacci computation loop (when N ≥ 3)
+CHK_A] RIGHT(IN)    (1,A1), (#,accept)  ; Check if we need to compute more
+
+; Copy A to output (A represents F(n-1))
+A1] RIGHT(A)        (1,A2), (#/1,B1)
+A2] RIGHT(OUT)      (#/1,A1)
+
+; Copy B to A (preparing for next iteration)
+B1] LEFT(B)         (1,B2), (#,CHK_B)
+B2] RIGHT(A)        (#/1,B1)
+
+; Check if we need another iteration
+CHK_B] RIGHT(IN)	(1,C1), (#,accept)
+
+; Copy B to output (B represents F(n-2))
+C1] RIGHT(B)		(1,C2), (#/1,D1)
+C2] RIGHT(OUT)	    (#/1,C1)
+
+; Copy A to B (preparing for next iteration)
+D1] LEFT(A)         (1,D2), (#,CHK_A)
+D2] RIGHT(B)        (#/1,D1)

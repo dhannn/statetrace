@@ -44,7 +44,7 @@ export default function QueueComponent({ name, content }) {
         }
     }, [content])
 
-    return <div>
+    return <div style={{overflow: 'scroll', 'textAlign': 'center'}}>
         <h3>Queue {name}</h3>
         <svg ref={svgRef} width={400} height={50}/>
     </div>; 
